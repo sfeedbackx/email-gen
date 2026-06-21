@@ -1,0 +1,732 @@
+enum auth_provider {
+  LOCAL
+  GOOGLE
+  FACEBOOK
+}
+
+enum offer_status {
+  PENDING
+  CANCELLED
+  MATCHED
+  EXPIRED
+}
+
+enum application_status {
+  SUBMITTED
+  WITHDRAWN
+  REJECTED
+  ACCEPTED
+}
+
+enum deposit_transaction_type {
+  DEPOSIT
+  DEDUCTION
+  REFUND
+}
+
+enum message_type {
+  TEXT
+  IMAGE
+  FILE
+  LOCATION
+}
+
+enum entity_type {
+  APPLICATION
+  JOB
+  OFFER
+}
+
+enum notification_type {
+  NEW_OFFER
+  NEW_APPLICATION
+  APPLICATION_ACCEPTED
+  APPLICATION_REJECTED
+  JOB_STARTED
+  JOB_COMPLETED
+  JOB_CANCELLED
+  CHAT_MESSAGE
+  REVIEW_RECEIVED
+  SYSTEM_ANNOUNCEMENT
+  DEPOSIT_LOW
+  APPOINTMENT_REMINDER
+}
+
+enum job_status {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum appointment_status {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum report_reason {
+  PRIVACY_VIOLATION
+  TOXIC
+  INAPPROPRIATE
+  FRAUD
+  SPAM
+  OTHER
+}
+
+enum report_status {
+  PENDING
+  REVIEWED
+  RESOLVED
+  DISMISSED
+}
+
+enum time_of_day {
+  MORNING
+  AFTERNOON
+  EVENING
+  NIGHT
+}
+
+enum country {
+  US
+  CA
+  GB
+  DE
+  UNKNOWN
+}
+
+enum currency {
+  TND
+  EUR
+  USD
+}
+
+enum gender {
+  MALE
+  FEMALE
+}
+
+enum user_type {
+  GUEST
+  PATIENT
+  PROFESSIONAL
+  ADMIN
+}
+
+table permissions {
+  id bigint [pk, not null]
+  name varchar(100) [not null, unique]
+  resource varchar(50) [not null]
+  action varchar(50) [not null]
+  description text
+  created_at "timestamp with time zone" [not null, default: `now()`]
+}
+
+table refresh_tokens {
+  id bigint [pk, not null]
+  user_id uuid [not null]
+  token varchar(255) [not null, unique]
+  user_agent varchar(255) [not null]
+  ip_address varchar(45) [not null]
+  expires_at "timestamp (6) with time zone" [not null]
+  revoked_at "timestamp (6) with time zone"
+  replaced_by_token varchar(255) [unique]
+  created_at "timestamp (6) with time zone" [not null, default: `now()`]
+  updated_at "timestamp (6) with time zone" [not null, default: `now()`]
+
+  indexes {
+    user_id [name: 'refresh_tokens_user_id_idx']
+  }
+}
+
+table role_permissions {
+  id bigint [pk, not null]
+  role_id bigint [not null]
+  permission_id bigint [not null]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+}
+
+table roles {
+  id bigint [pk, not null]
+  name varchar(100) [not null, unique]
+  target_type user_type
+  display_name varchar(100)
+  description text
+  is_default boolean [not null, default: false]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+}
+
+table user_roles {
+  id bigint [pk, not null]
+  user_id uuid [not null]
+  role_id bigint [not null]
+  assigned_at "timestamp with time zone" [default: `now()`]
+}
+
+table users {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  email varchar(255) [not null, unique]
+  password varchar(72)
+  first_name varchar(50)
+  last_name varchar(50)
+  profile_picture varchar(255)
+  gender gender
+  date_of_birth date
+  auth_provider auth_provider [not null, default: 'LOCAL']
+  provider_id varchar(255)
+  email_verified_at "timestamp with time zone"
+  is_id_verified boolean [not null, default: false]
+  is_active boolean [not null, default: true]
+  last_login_at "timestamp with time zone"
+  attributes jsonb [default: `{"onboardingComplete":false}`]
+  user_type user_type [not null, default: 'GUEST']
+  balance_id bigint
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    email [name: 'users_email_idx', unique]
+    balance_id [name: 'users_balance_idx']
+  }
+}
+
+table offers {
+  id bigint [pk, not null]
+  created_by uuid [not null]
+  category_id integer [not null]
+  patient_data_id bigint [not null]
+  idempotency_key uuid [not null, unique]
+  status offer_status [not null, default: 'PENDING']
+  public_url varchar(75)
+  start_datetime "timestamp with time zone" [not null]
+  end_datetime "timestamp with time zone" [not null]
+  special_instructions varchar(255)
+  is_urgent boolean [not null, default: false]
+  additional_notes text
+  uploaded_documents text[] [not null, default: `[]`]
+  accepted_application_id bigint
+  suggested_price_minor bigint
+  suggested_price_currency currency [default: 'TND']
+  expires_at "timestamp with time zone"
+  matched_at "timestamp with time zone"
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    created_by [name: 'offers_createdby_id_idx']
+    patient_data_id [name: 'patient_data_id_idx']
+  }
+}
+
+table applications {
+  id bigint [pk, not null]
+  offer_id bigint [not null]
+  professional_id uuid [not null]
+  idempotency_key uuid [not null, unique]
+  status application_status [not null, default: 'SUBMITTED']
+  bid_minor bigint [not null]
+  currency currency [not null, default: 'TND']
+  message text
+  available_from "timestamp with time zone"
+  available_until "timestamp with time zone"
+  withdrawn_at "timestamp with time zone"
+  reviewed_at "timestamp with time zone"
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    offer_id [name: 'applications_offer_id_idx']
+    professional_id [name: 'applications_professional_id_idx']
+    (professional_id, offer_id) [name: 'applications_unique_professional_offer_idx', unique]
+  }
+}
+
+table reviews {
+  id bigint [pk, not null]
+  offer_id bigint [not null]
+  job_id bigint [not null]
+  reviewer_id uuid [not null]
+  reviewed_id uuid [not null]
+  rating integer [not null]
+  message text
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    offer_id [name: 'reviews_offer_id_idx']
+    job_id [name: 'reviews_job_id_idx']
+    reviewer_id [name: 'reviews_reviewer_id_idx']
+    reviewed_id [name: 'reviews_reviewed_id_idx']
+    (reviewer_id, job_id) [name: 'reviews_unique_reviewer_job_idx', unique]
+  }
+}
+
+table deposit_transactions {
+  id bigint [pk, not null]
+  professional_id uuid [not null]
+  balance_id bigint [not null]
+  type deposit_transaction_type [not null]
+  amount_minor bigint [not null]
+  currency currency [not null, default: 'TND']
+  job_id bigint
+  balance_before_minor bigint [not null]
+  balance_after_minor bigint [not null]
+  description text [not null]
+  external_reference varchar(100)
+  processed_by uuid
+  created_at "timestamp (6) with time zone" [not null, default: `now()`]
+
+  indexes {
+    balance_id [name: 'deposit_transactions_balance_id_idx']
+    job_id [name: 'deposit_transactions_job_id_idx']
+    professional_id [name: 'deposit_transactions_professional_id_idx']
+  }
+}
+
+table chat_messages {
+  id bigint [pk, not null]
+  offer_id bigint
+  job_id bigint
+  sender_id uuid [not null]
+  receiver_id uuid [not null]
+  message text [not null]
+  message_type message_type [not null, default: 'TEXT']
+  is_read boolean [not null, default: false]
+  read_at "timestamp with time zone"
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    offer_id [name: 'chat_messages_offer_id_idx']
+    job_id [name: 'chat_messages_job_id_idx']
+    sender_id [name: 'chat_messages_sender_id_idx']
+    receiver_id [name: 'chat_messages_receiver_id_idx']
+  }
+}
+
+table notifications {
+  id bigint [pk, not null]
+  user_id uuid [not null]
+  type notification_type [not null]
+  title varchar(50) [not null]
+  message text [not null]
+  entity_id bigint [not null]
+  entity_type entity_type [not null]
+  is_read boolean [not null, default: false]
+  read_at "timestamp with time zone"
+  is_pushed boolean [not null, default: false]
+  pushed_at "timestamp with time zone"
+  device_token varchar(500)
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    user_id [name: 'notifications_user_id_idx']
+    (entity_type, entity_id) [name: 'notifications_entity_type_and_id_idx']
+  }
+}
+
+table categories {
+  id integer [pk, not null]
+  name varchar(100) [not null]
+  description text [not null]
+  icon_url text
+  is_active boolean [not null, default: true]
+  available_specialists integer [not null, default: 0]
+  is_popular boolean [not null, default: false]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+}
+
+table announcements {
+  id bigint [pk, not null]
+  title varchar(200) [not null]
+  details text
+  image_url varchar(300)
+  target_type user_type
+  is_active boolean [not null, default: true]
+  published_at "timestamp with time zone"
+  expires_at "timestamp with time zone"
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+}
+
+table jobs {
+  id bigint [pk, not null]
+  offer_id bigint [not null]
+  application_id bigint [not null]
+  patient_id uuid [not null]
+  professional_id uuid [not null]
+  status job_status [not null, default: 'ACTIVE']
+  agreed_price_minor bigint [not null]
+  agreed_price_currency currency [not null, default: 'TND']
+  commission_rate_percent integer [not null, default: 10]
+  commission_amount_minor bigint
+  started_at "timestamp with time zone"
+  completed_at "timestamp with time zone"
+  cancelled_at "timestamp with time zone"
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    offer_id [name: 'jobs_offer_id_idx']
+    application_id [name: 'jobs_application_id_idx']
+    patient_id [name: 'jobs_patient_id_idx']
+    professional_id [name: 'jobs_professional_id_idx']
+  }
+}
+
+table appointments {
+  id bigint [pk, not null]
+  offer_id bigint [not null]
+  job_id bigint [not null]
+  patient_id uuid [not null]
+  professional_id uuid [not null]
+  status appointment_status [not null, default: 'SCHEDULED']
+  scheduled_date "timestamp with time zone" [not null]
+  estimated_duration_minutes integer
+  actual_start_time "timestamp with time zone"
+  actual_end_time "timestamp with time zone"
+  location jsonb
+  confirmed_at "timestamp with time zone"
+  cancelled_at "timestamp with time zone"
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    job_id [name: 'appointments_job_id_idx']
+    patient_id [name: 'appointments_patient_id_idx']
+    professional_id [name: 'appointments_professional_id_idx']
+  }
+}
+
+table patients {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  user_id uuid [not null, unique]
+  total_offers_created integer [not null, default: 0]
+  total_offers_completed integer [not null, default: 0]
+  total_amount_spent_minor bigint [not null, default: 0]
+  notification_preferences jsonb [default: `{}`]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    user_id [name: 'patients_user_id_idx', unique]
+  }
+}
+
+table professionals {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  user_id uuid [not null, unique]
+  specialization_id bigint
+  license_number varchar(100)
+  about text
+  years_of_experience integer
+  graduation_date date
+  skills text[]
+  is_diploma_verified boolean [not null, default: false]
+  balance_minor bigint [not null, default: 0]
+  currency varchar(3) [not null, default: 'TND']
+  notification_preferences jsonb [default: `{}`]
+  total_applications_submitted integer [not null, default: 0]
+  total_jobs_completed integer [not null, default: 0]
+  total_patient_treated integer [not null, default: 0]
+  total_earnings_minor bigint [not null, default: 0]
+  average_rating real [default: 0]
+  total_reviews integer [not null, default: 0]
+  service_radius_km integer [default: 25]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    user_id [name: 'professionals_user_id_idx', unique]
+    specialization_id [name: 'professionals_specialization_idx']
+  }
+}
+
+table offer_treatments {
+  id bigint [pk, not null]
+  offer_id bigint [not null]
+  treatment_id integer [not null]
+  treatment_variant_id integer [not null]
+  created_at "timestamp (6) with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    offer_id [name: 'offer_treatments_offer_id_idx']
+    treatment_id [name: 'offer_treatments_treatment_id_idx']
+    treatment_variant_id [name: 'offer_treatments_treatment_variant_id_idx']
+    (offer_id, treatment_id, treatment_variant_id) [name: 'offer_treatments_unique_offer_treatment_variant_idx', unique]
+  }
+}
+
+table reports {
+  id bigint [pk, not null]
+  reporter_id uuid [not null]
+  idempotency_key uuid [not null, unique]
+  reported_user_id uuid [not null]
+  reason report_reason [not null]
+  comment text
+  status report_status [not null, default: 'PENDING']
+  offer_id bigint
+  job_id bigint
+  reviewed_by uuid
+  reviewed_at "timestamp with time zone"
+  admin_notes text
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    idempotency_key [name: 'reports_idempotency_id_uidx', unique]
+    reporter_id [name: 'reports_reporter_id_idx']
+    reported_user_id [name: 'reports_reported_user_id_idx']
+  }
+}
+
+table professional_preferences {
+  id bigint [pk, not null]
+  professional_id uuid [not null]
+  preferred_gender gender
+  max_distance_m integer [default: 50]
+  preferred_time_of_day time_of_day
+  available_categories integer[]
+  notify_new_offers boolean [not null, default: true]
+  notify_urgent_offers boolean [not null, default: true]
+  notify_messages boolean [not null, default: true]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    professional_id [name: 'professional_preferences_professional_id_idx', unique]
+  }
+}
+
+table treatments {
+  id integer [pk, not null]
+  category_id integer [not null]
+  name varchar(100) [not null]
+  description text [not null]
+  is_active boolean [not null, default: true]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    category_id [name: 'treatments_category_id_idx']
+  }
+}
+
+table user_addresses {
+  id bigint [pk, not null]
+  user_id uuid [not null]
+  street_address varchar(255) [not null]
+  city varchar(100) [not null]
+  postal_code varchar(10) [not null]
+  country country [not null, default: 'UNKNOWN']
+  location jsonb
+  is_primary boolean [not null, default: true]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    (user_id, is_primary) [name: 'user_addresses_user_primary_idx', unique]
+  }
+}
+
+table phone {
+  id bigint [pk, not null]
+  user_id uuid [not null]
+  uri varchar(20) [not null, unique]
+  country_code integer [not null]
+  formatted_phone_number varchar(25) [not null]
+  national_format varchar(15) [not null]
+  phone_number_full varchar(15) [not null]
+  phone_verified_at "timestamp with time zone"
+}
+
+table specialisms {
+  id bigint [pk, not null]
+  name varchar(100) [not null, unique]
+  display_name varchar(100) [not null]
+  description text
+  is_active boolean [default: true]
+  created_at "timestamp with time zone" [default: `now()`]
+}
+
+table balances {
+  id bigint [pk, not null]
+  professional_id uuid [not null]
+  current_balance bigint [not null]
+  currency currency [not null, default: 'TND']
+  created_at "timestamp (6) with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    professional_id [name: 'balances_professional_id_idx']
+  }
+}
+
+table price_estimation {
+  id bigint [pk, not null]
+  professional_id uuid [not null]
+  treatment_variant_id integer [not null]
+  base_price_minor bigint [not null]
+  base_price_currency currency [default: 'TND']
+  discounted_price_minor bigint
+  is_default boolean [not null, default: false]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+  valid_to "timestamp with time zone" [not null]
+
+  indexes {
+    professional_id [name: 'price_estimation_pro_id_idx']
+    treatment_variant_id [name: 'price_estimation_treatment_variant_id_idx']
+  }
+}
+
+table specialism_treatments {
+  id bigint [pk, not null]
+  specialism_id bigint [not null]
+  treatment_id integer [not null]
+  requires_special_certification boolean [default: false]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    specialism_id [name: 'specialism_treatments_specialism_id_idx']
+    treatment_id [name: 'specialism_treatments_treatment_id_idx']
+  }
+}
+
+table treatments_variants {
+  id integer [pk, not null]
+  treatment_id integer [not null]
+  name varchar(100) [not null]
+  description text
+  requires_prescription boolean [not null, default: false]
+  template jsonb [not null]
+  is_active boolean [not null, default: true]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    treatment_id [name: 'treatments_treatments_variants_id_idx']
+  }
+}
+
+table patient_data {
+  id bigint [pk, not null]
+  first_name varchar(50) [not null]
+  last_name varchar(50) [not null]
+  street_address varchar(255) [not null]
+  phone_number varchar(15) [not null]
+  country_code integer [not null]
+  city varchar(100) [not null]
+  postal_code varchar(10) [not null]
+  country country [not null, default: 'UNKNOWN']
+  location jsonb
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+}
+
+ref: refresh_tokens.user_id > users.id
+
+ref: role_permissions.role_id > roles.id
+
+ref: role_permissions.permission_id > permissions.id
+
+ref: patients.user_id - users.id
+
+ref: balances.professional_id - users.id
+
+ref: professionals.user_id - users.id
+
+ref: professional_preferences.professional_id - users.id
+
+ref: user_roles.role_id > roles.id
+
+ref: user_roles.user_id > users.id
+
+ref: offers.created_by > users.id
+
+ref: applications.offer_id > offers.id
+
+ref: offers.patient_data_id - patient_data.id
+
+ref: applications.professional_id > users.id
+
+ref: reviews.offer_id > offers.id
+
+ref: reviews.job_id > jobs.id
+
+ref: reviews.reviewer_id > users.id
+
+ref: reviews.reviewed_id > users.id
+
+ref: deposit_transactions.job_id > jobs.id
+
+ref: deposit_transactions.professional_id > users.id
+
+ref: deposit_transactions.balance_id > balances.id
+
+ref: chat_messages.job_id > jobs.id
+
+ref: chat_messages.offer_id > offers.id
+
+ref: chat_messages.sender_id > users.id
+
+ref: chat_messages.receiver_id > users.id
+
+ref: notifications.user_id > users.id
+
+ref: jobs.offer_id > offers.id
+
+ref: jobs.application_id > applications.id
+
+ref: jobs.patient_id > users.id
+
+ref: jobs.professional_id > users.id
+
+ref: appointments.job_id - jobs.id
+
+ref: appointments.offer_id > offers.id
+
+ref: appointments.patient_id > users.id
+
+ref: appointments.professional_id > users.id
+
+ref: professionals.specialization_id > specialisms.id
+
+ref: offer_treatments.offer_id > offers.id
+
+ref: offer_treatments.treatment_id > treatments.id
+
+ref: offer_treatments.treatment_variant_id > treatments_variants.id
+
+ref: reports.reporter_id > users.id
+
+ref: reports.reported_user_id > users.id
+
+ref: reports.reviewed_by > users.id
+
+ref: reports.job_id - jobs.id
+
+ref: reports.offer_id - offers.id
+
+ref: treatments.category_id > categories.id
+
+ref: user_addresses.user_id > users.id
+
+ref: phone.user_id - users.id
+
+ref: price_estimation.professional_id > users.id
+
+ref: price_estimation.treatment_variant_id > treatments_variants.id
+
+ref: specialism_treatments.specialism_id > specialisms.id
+
+ref: specialism_treatments.treatment_id > treatments.id
+
+ref: treatments_variants.treatment_id > treatments.id

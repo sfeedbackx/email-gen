@@ -1,0 +1,76 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: emailgen-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: emailgen
+    volumes:
+    - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: emailgen-redis
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   command: redis-server --appendonly yes
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   restart: unless-stopped
+
+  migrate:
+    container_name: ephemeral-migrate
+    build:
+      context: .
+      dockerfile: ./Dockerfile.migration
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./.env
+    command: sh -c "npm run db:generate; npm run db:migrate"
+    volumes:
+      - ./src/database/drizzle:/app/src/database/drizzle
+    restart: "no" # Don't restart if migration fails
+
+  # To run the API in a container
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: emailgen-api
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - ./.env.development
+      - ./.env
+    volumes:
+      - ./locales:/app/locales
+    depends_on:
+      postgres:
+        condition: service_healthy
+      # redis:
+      #   condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  # redis_data:
