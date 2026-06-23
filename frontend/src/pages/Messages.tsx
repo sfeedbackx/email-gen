@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ThreadsSearch } from "../components/threads/ThreadsSearch";
 import { MessagingSection } from "../components/messages/MessagingSection";
 import { DraftSection } from "../components/drafts/DraftSection";
-import type { Draft } from "../types/types";
+import type { Draft } from "../types/drafts.types";
 
 export const Meessages = (props: {}) => {
   const [draftOpened, setDraft] = useState(false)

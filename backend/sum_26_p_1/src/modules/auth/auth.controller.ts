@@ -55,7 +55,7 @@ export class AuthController {
       .findByEmail(registerDto.email)
       .then((value) => value[0]);
     if (existingUser) {
-      throw new ConflictException();
+      throw new ConflictException( "email already used");
     }
 
     const hashedPassword: string = await this.authService.hashPassword(registerDto.password);

@@ -1,6 +1,7 @@
 import { Box, Center, TextInput, PasswordInput, Text, Anchor, Button } from "@mantine/core"
 import { useState } from "react"
 import { z } from "zod"
+import { useLogin } from "../../hooks/useAuth"
 
 const schema = z.object({
   email: z.email('Invalid email'),
@@ -13,6 +14,8 @@ type FormErrors = Partial<Record<keyof LoginForm, string>>
 export const Login = () => {
   const [form, setForm] = useState<Partial<LoginForm>>({})
   const [errors, setErrors] = useState<FormErrors>({})
+  const [serverError, setServerError] = useState<string | null>(null)
+  const { mutate: login, isPending } = useLogin(setErrors , setServerError)
 
   const handleChange = (field: keyof LoginForm, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -32,8 +35,7 @@ export const Login = () => {
     }
 
     setErrors({})
-    console.log('Valid data:', result.data)
-    // call your API here
+    login(result.data)
   }
 
   return (
@@ -57,10 +59,16 @@ export const Login = () => {
             onChange={(e) => handleChange('password', e.target.value)}
           />
 
-          <Button mt="xl" fullWidth onClick={onSubmit}>
+          <div className="flex w-full  mt-5 flex-col gap-4">
+          {serverError && (
+            <Text c="red" size="sm" ta="center">
+              {serverError}
+            </Text>
+          )}
+          <Button mt="" fullWidth onClick={onSubmit} loading={isPending}>
             Login
           </Button>
-
+          </div>
           <Text mt="md" ta="center" size="sm" c="dimmed">
             Don't have an account?{' '}
             <Anchor href="/signup" size="sm">

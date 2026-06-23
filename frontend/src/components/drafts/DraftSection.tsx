@@ -1,4 +1,4 @@
-import type { Draft } from "../../types/types";
+import type { Draft } from "../../types/drafts.types";
 import { DraftsBanner } from "./DraftsBanner"
 import MailBox from "./MailBox";
 

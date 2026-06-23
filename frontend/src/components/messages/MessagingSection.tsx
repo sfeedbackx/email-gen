@@ -3,7 +3,7 @@ import { useState } from "react"
 import { IoMdSend } from "react-icons/io"
 import DefaultMessageBox from "./DefaultMessageBox";
 import DraftsMessage from "./DraftsMessage";
-import type { Draft } from "../../types/types";
+import type { Draft } from "../../types/drafts.types";
 
 export const MessagingSection = (props: { draftOpened: boolean, setDraft: (val: boolean) => void, selectedDraft: Draft | null, setSelectedDraft: (d: Draft | null) => void }) => {
   const messages = [

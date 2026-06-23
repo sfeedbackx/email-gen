@@ -1,11 +1,12 @@
 import { Box, Center, Flex, TextInput, PasswordInput, Select, Text, Anchor, Button } from "@mantine/core"
 import { useState } from "react"
 import { z } from "zod"
+import { useSignup } from "../../hooks/useAuth"
 
 const schema = z.object({
   firstName: z.string().min(2, 'First name too short'),
   lastName: z.string().min(2, 'Last name too short'),
-  email: z.email('Invalid email'),
+  email: z.string('Invalid email'),
   password: z.string().min(8, 'Min 8 characters'),
   confirmPassword: z.string(),
   dateOfBirth: z.string().min(1, 'Date of birth is required'),
@@ -21,14 +22,16 @@ type FormErrors = Partial<Record<keyof SignupForm, string>>
 export const Signup = () => {
   const [dateSet, setDateSet] = useState(false)
   const [form, setForm] = useState<Partial<SignupForm>>({})
+  const [serverError, setServerError] = useState<string | null>(null)
   const [errors, setErrors] = useState<FormErrors>({})
-
+  const { mutate: signup, isPending } = useSignup(setErrors , setServerError)
   const handleChange = (field: keyof SignupForm, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
   const onSubmit = () => {
     const result = schema.safeParse(form)
+
 
     if (!result.success) {
       const fieldErrors: FormErrors = {}
@@ -41,8 +44,9 @@ export const Signup = () => {
     }
 
     setErrors({})
-    console.log('Valid data:', result.data)
-    // call your API here
+    signup(result.data)
+    console.log(`${serverError}`);
+
   }
 
   return (
@@ -102,13 +106,14 @@ export const Signup = () => {
             classNames={{ label: 'text-blue-500 font-semibold' }}
             styles={{ input: { color: !dateSet ? '#9ca3af' : '' } }}
             error={errors.dateOfBirth}
-            onChange={(e) => { handleChange('dateOfBirth', e.target.value); 
-              if (e.target.value.trim().length == 0 || e.target.value.trim() === '' ) {
+            onChange={(e) => {
+              handleChange('dateOfBirth', e.target.value);
+              if (e.target.value.trim().length == 0 || e.target.value.trim() === '') {
                 setDateSet(false);
-              }else{
+              } else {
                 setDateSet(true);
               }
-             }}
+            }}
           />
 
           <Select
@@ -123,11 +128,16 @@ export const Signup = () => {
             ]}
             onChange={(value) => handleChange('gender', value ?? '')}
           />
-
-          <Button mt="xl" fullWidth onClick={onSubmit}>
+          <div className="flex w-full  mt-5 flex-col gap-4">
+          {serverError && (
+            <Text c="red" size="sm" ta="center">
+              {serverError}
+            </Text>
+          )}
+          <Button mt="" fullWidth onClick={onSubmit} loading={isPending}>
             Sign Up
           </Button>
-
+          </div>
           <Text mt="md" ta="center" size="sm" c="dimmed">
             Already have an account?{' '}
             <Anchor href="/login" size="sm">

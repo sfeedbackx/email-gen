@@ -12,17 +12,31 @@ import { Login } from './components/auth/Login';
 import Home from './pages/Home';
 import { Threads } from './pages/Threads';
 import { Meessages } from './pages/Messages';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import ProtectedRoute from './components/common/ProtectedRoute';
 
 const AppContent: React.FC = () => {
 
   return (
     <main className="main-content flex">
       <Routes>
-        <Route path={ROUTES.HOME} element={<Home />} />
+        <Route path={ROUTES.HOME} element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        } />
         <Route path={ROUTES.LOGIN} element={<Login />} />
         <Route path={ROUTES.REGISTER} element={<Signup />} />
-        <Route path={ROUTES.THREADS} element={<Threads />} />
-        <Route path={ROUTES.MESSAGE} element={<Meessages />} />
+        <Route path={ROUTES.THREADS} element={
+          <ProtectedRoute>
+            <Threads/>
+          </ProtectedRoute>
+        } />
+        <Route path={ROUTES.MESSAGE} element={
+          <ProtectedRoute>
+            <Meessages />
+          </ProtectedRoute>
+        } />
 
         {/*  PROTECTED CTF */}
         {/*   <Route
@@ -42,14 +56,17 @@ const AppContent: React.FC = () => {
 };
 
 const App: React.FC = () => {
+  const queryClient = new QueryClient()
   return (
-    <Router>
-      {/*<AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        {/*<AuthProvider>
         <ToastProvider>*/}
-      <AppContent />
-      {/*</ToastProvider>
+        <AppContent />
+        {/*</ToastProvider>
       </AuthProvider>*/}
-    </Router>
+      </Router>
+    </QueryClientProvider  >
   );
 };
 
