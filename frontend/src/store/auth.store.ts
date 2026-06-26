@@ -4,53 +4,49 @@ import type { UserWithPermissions } from '../types/user.type'
 import type { JwtPayload } from '../types/rbac.types'
 import { persist } from 'zustand/middleware'
 
-const mapToUserWithPermission = (jwt: JwtPayload): UserWithPermissions => {
-  return {
-    id: jwt.sub,
-    userType: jwt.type,
-    authProvider : jwt.authProvider,
-    email : jwt.email,
-    firstName : jwt.firstName,
-    lastName : jwt.lastName,
-    permissions : jwt.permissions,
-    role : jwt.role,
-    userAttributes : jwt.userAttributes
-
-  }
-}
-
-type AuthStore = {
+export type AuthStore = {
   user: UserWithPermissions | null
   token: string | null
-  isAuthenticated : boolean,
   login: (token: string) => void
   logout: () => void
 }
 
-const useAuthStore = create<AuthStore> ()(
-  persist(
-  (set) => ({
-  user: null,
-  token: null,
-  isAuthenticated : false,
+export const mapToUserWithPermission = (jwt: JwtPayload): UserWithPermissions => {
+  return {
+    id: jwt.sub,
+    userType: jwt.type,
+    authProvider: jwt.authProvider,
+    email: jwt.email,
+    firstName: jwt.firstName,
+    lastName: jwt.lastName,
+    permissions: jwt.permissions,
+    role: jwt.role,
+    userAttributes: jwt.userAttributes,
+    iat : jwt.iat,
+    exp : jwt.exp
 
-  login: (token) => {
-    const decoded = jwtDecode<JwtPayload>(token)
-    const user = mapToUserWithPermission(decoded)
-    localStorage.setItem('token', token)
-    set({ token, user: user , isAuthenticated : true })
-  },
+  }
+}
 
-  logout: () => {
-    localStorage.removeItem('token')
-    set({ token: null, user: null })
-  },
-}),
- {
-      name: 'auth-storage',
-      partialize: (state) => ({ token: state.token })
-    }
-)
+
+const useAuthStore = create<AuthStore>()(
+    (set) => ({
+      user: null,
+      token: null,
+
+      login: (token) => {
+        const decoded = jwtDecode<JwtPayload>(token)
+        const user = mapToUserWithPermission(decoded)
+        set({ token, user: user })
+      },
+
+      logout: () => {
+        localStorage.removeItem('token')
+        localStorage.removeItem('auth-storage')
+        set({ token: null, user: null })
+
+      },
+    }),
 )
 
 export default useAuthStore

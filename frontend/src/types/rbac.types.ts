@@ -27,6 +27,6 @@ export interface JwtPayload {
   type: UserType
   role: Role[]
   permissions: string[]
-  iat?: number
-  exp?: number
+  iat: number
+  exp: number
 }

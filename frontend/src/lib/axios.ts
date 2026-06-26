@@ -1,4 +1,5 @@
 import axios from 'axios'
+import useAuthStore from '../store/auth.store'
 export const api = axios.create({
   baseURL: 'http://localhost:3000',
   headers: {
@@ -8,7 +9,7 @@ export const api = axios.create({
 
 // auto attach token to every request
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
+const token = useAuthStore.getState().token
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })

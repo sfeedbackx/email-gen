@@ -4,10 +4,12 @@ import { FiSidebar } from "react-icons/fi";
 import { RiContactsLine } from "react-icons/ri";
 import { MdMailOutline } from "react-icons/md";
 import { LuArrowDownUp } from "react-icons/lu";
+import { useLogout } from "../../hooks/useAuth";
 export const SideBar = (props: {}) => {
   const [sideOpen, setsideOpen] = useState(false);
   const [secondMenuOpened, setSecondMenuOpened] = useState(false)
   const getInitial = (name: string) => name.charAt(0).toUpperCase();
+  const { mutate: logout, isPending } = useLogout()
 
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -21,6 +23,9 @@ export const SideBar = (props: {}) => {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  const onSubmit = () => {
+    logout()
+  }
   return (
     <Box className={`flex flex-col px-2 pt-2 h-screen bg-white  border-r-2 border-r-blue-500 transition-all duration-300 ${sideOpen ? 'w-72' : 'w-14 items-center'}`}>
 
@@ -47,24 +52,26 @@ export const SideBar = (props: {}) => {
       </div>
 
       {/* Footer / User */}
-      <div className="mt-auto w-full relative   flex flex-row  items-center ">
-        <Flex
+      <div className="mt-auto w-full relative   flex flex-row  items-center " ref={ref}>
+        {secondMenuOpened && <Flex
           gap="0.5rem"
           justify="center"
           align="center"
           direction="column"
           wrap="wrap"
-          className={`z-10 w-full p-3  absolute  ${secondMenuOpened ? "-translate-y-6" : ""} bottom-3  transition-all duration-300`}
+          className={`div-sec-win  bg-white z-40  w-58 p-3  absolute border border-blue-500 rounded-sm   bottom-16  transition-all duration-300`}
 
         >
-          <Button fullWidth>Button 1</Button>
-          <Button>Button 2</Button>
-        </Flex>
-        <div className={`relative -mx-2 ${sideOpen ? 'border-t-2 border-t-black w-[calc(100%+1rem)]' : ''}  
-    flex items-center gap-3 py-2 px-3 hover:cursor-pointer text-gray-600 hover:text-blue-500
-    hover:bg-blue-50 active:bg-blue-100 active:scale-95 transition-all duration-150 ${!sideOpen && 'justify-center'}`} onClick={() => {
-            setSecondMenuOpened(!secondMenuOpened);
-          }} ref={ref} >
+          <Button variant="default" fullWidth className="div-sec-win flex w-full justify-center items-center gap-3 px-2 py-2 hover:cursor-pointer text-black  hover:text-gray-800 hover:bg-gray-100 active:bg-gray-100 active:scale-95 transition-all duration-150" loading={isPending} onClick={onSubmit}>
+            Logout
+          </Button>
+
+        </Flex>}
+        <div className={` ${sideOpen ? ' -mx-2  gap-3 border-t-2 border-t-black w-[calc(100%+1rem)]' : 'w-full'}  
+        flex items-center   py-2 px-3 hover:cursor-pointer text-gray-600 hover:text-blue-500
+        hover:bg-blue-50 active:bg-blue-100 active:scale-95 transition-all duration-150 ${!sideOpen && 'justify-center'}`} onClick={() => {
+            setSecondMenuOpened((prev) => !prev);
+          }}  >
           <div className="w-10 h-10 rounded-full bg-blue-500 flex  items-center justify-center text-white font-bold shrink-0">
             {getInitial('ahmed')}
           </div>

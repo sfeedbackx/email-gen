@@ -11,5 +11,7 @@ export interface UserWithPermissions {
   authProvider: AuthProvider
   role: Role[]
   permissions: string[]
+  iat : number,
+  exp : number
 }
 

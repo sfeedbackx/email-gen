@@ -11,9 +11,10 @@ import { Signup } from './components/auth/Signup';
 import { Login } from './components/auth/Login';
 import Home from './pages/Home';
 import { Threads } from './pages/Threads';
-import { Meessages } from './pages/Messages';
+import { Messages } from './pages/Messages';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import { Contacts } from './pages/Contact';
 
 const AppContent: React.FC = () => {
 
@@ -32,11 +33,17 @@ const AppContent: React.FC = () => {
             <Threads/>
           </ProtectedRoute>
         } />
-        <Route path={ROUTES.MESSAGE} element={
+        <Route path={`${ROUTES.MESSAGE}/:id`} element={
           <ProtectedRoute>
-            <Meessages />
+            <Messages />
           </ProtectedRoute>
         } />
+          <Route path={ROUTES.CONTACTS} element={
+          <ProtectedRoute>
+            <Contacts/>
+          </ProtectedRoute>
+        } />
+
 
         {/*  PROTECTED CTF */}
         {/*   <Route

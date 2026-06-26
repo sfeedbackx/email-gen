@@ -20,7 +20,6 @@ export default function Home() {
     <>
       <SideBar/>
       <Center className="w-screen h-screen relative" bg="var(--mantine-color-gray-light)">
-        <Box bg="var(--mantine-color-blue-light)">All elements inside Center are centered</Box>
         <Button onClick={() => setOpened(true)}>Open dropdown</Button>
 
         {opened && (

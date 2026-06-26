@@ -24,6 +24,7 @@ import { Public } from './decorators/public.decorator';
 import { AuthResponseDto, LoginDto, LogoutDto, RegisterDto } from './dto/auth.dto';
 import { LocalAuthGuard } from './guards/login-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
+import { log } from 'node:console';
 @Controller('auth')
 export class AuthController {
   private readonly cookieOptions: CookieOptions;
@@ -34,10 +35,12 @@ export class AuthController {
     private userRepository: UserRepository,
     private appConfigService: AppConfigService,
   ) {
+    const isProduction = this.appConfigService.nodeEnv === 'production';
+    log(isProduction);
     this.cookieOptions = {
       httpOnly: true,
-      secure: this.appConfigService.nodeEnv === 'production',
-      sameSite: 'none',
+      secure: false,
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: this.appConfigService.maxAge,
     };
   }
@@ -55,7 +58,7 @@ export class AuthController {
       .findByEmail(registerDto.email)
       .then((value) => value[0]);
     if (existingUser) {
-      throw new ConflictException( "email already used");
+      throw new ConflictException('email already used');
     }
 
     const hashedPassword: string = await this.authService.hashPassword(registerDto.password);
@@ -110,8 +113,6 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
     @Cookies('refresh_token') oldRefreshToken: string,
   ) {
-    
-    console.log(oldRefreshToken)
     const { accessToken, refreshToken } = await this.authService.refreshTokens(
       oldRefreshToken,
       ip,
@@ -128,9 +129,11 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(
     @Cookies('refresh_token') oldRefreshToken: string,
-
+    @Res({ passthrough: true }) res: Response,
   ) {
-    return this.authService.logout(oldRefreshToken);
+    await this.authService.logout(oldRefreshToken);
+    res.clearCookie('refresh_token')
+    return
   }
 
   @UseGuards(AuthGuard('jwt'))

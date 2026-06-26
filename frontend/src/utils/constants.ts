@@ -6,7 +6,7 @@ export const ROUTES = {
   REGISTER: '/register',
   CHALLENGES: '/challenges',
   CHALLENGE_DETAIL: '/challenges/:id',
-  LEADERBOARD: '/leaderboard',
+  CONTACTS: '/contacts',
   PROFILE: '/profile',
   ADMIN: '/admin',
   LOGOUT: '/logout',
@@ -20,3 +20,6 @@ export const LOCAL_STORAGE_KEYS = {
 } as const;
 
 export const AUTH_PREFIX = 'Bearer ';
+
+export const TTL_MS = 1000 * 60 * 5
+

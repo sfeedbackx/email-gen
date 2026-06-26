@@ -4,6 +4,7 @@ import { IoMdSend } from "react-icons/io"
 import DefaultMessageBox from "./DefaultMessageBox";
 import DraftsMessage from "./DraftsMessage";
 import type { Draft } from "../../types/drafts.types";
+import { RepliesMessages } from "./RepliesMessages";
 
 export const MessagingSection = (props: { draftOpened: boolean, setDraft: (val: boolean) => void, selectedDraft: Draft | null, setSelectedDraft: (d: Draft | null) => void }) => {
   const messages = [
@@ -50,6 +51,7 @@ export const MessagingSection = (props: { draftOpened: boolean, setDraft: (val: 
             }
             console.log( props.selectedDraft)
           }} />
+        <RepliesMessages/>
       </div>
 
       {/* Textarea — pinned to bottom */}

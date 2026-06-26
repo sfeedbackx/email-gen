@@ -7,8 +7,8 @@ import useAuthStore from '../store/auth.store'
 import { HttpStatusCode } from 'axios'
 
 export const useAuth = () => {
-  const { user, token, isAuthenticated, login, logout } = useAuthStore()
-  return { user, token, isAuthenticated, login, logout }
+  const { user, token, login, logout } = useAuthStore()
+  return { user, token, login, logout }
 }
 
 export const useSignup = (setErrors: (errors: Record<string, string>) => void,
@@ -58,10 +58,10 @@ export const useLogin = (setErrors: (errors: Record<string, string>) => void,
 
   return useMutation({
     mutationFn: (data: LoginData) =>
-      api.post('/auth/login', data).then(res => res.data),
+      api.post('/auth/login', data, { withCredentials: true }).then(res => res.data),
     onSuccess: (res) => {
       login(res.data.accessToken)
-      navigate(ROUTES.MESSAGE)
+      navigate(ROUTES.CONTACTS)
     },
     onError: (error: any) => {
       const issues = error.response?.data?.errors
@@ -79,6 +79,43 @@ export const useLogin = (setErrors: (errors: Record<string, string>) => void,
         })
         setErrors(fieldErrors)
       }
+    }
+  })
+}
+export const useLogout = () => {
+  const navigate = useNavigate()
+  const { logout } = useAuthStore()
+
+
+  return useMutation({
+    mutationFn: () =>
+      api.post('/auth/logout', {}, { withCredentials: true }),
+    onSuccess: () => {
+      logout()
+      navigate(ROUTES.LOGIN)
+    },
+    onError: () => {
+      logout()
+      navigate(ROUTES.LOGIN)
+    }
+  })
+}
+export const useRefresh = () => {
+  const navigate = useNavigate()
+  const { login, logout } = useAuthStore()
+
+
+  return useMutation({
+    mutationFn: () =>
+      api.post('/auth/refresh', {}, { withCredentials: true }).then(res => res.data),
+    onSuccess: (res) => {
+      login(res.data.accessToken)
+      
+      
+    },
+    onError: () => {
+      logout()
+      navigate(ROUTES.LOGIN)
     }
   })
 }

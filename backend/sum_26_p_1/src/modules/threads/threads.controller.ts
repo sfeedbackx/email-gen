@@ -29,7 +29,7 @@ export class ThreadsController {
 
   @Get()
   @ZodSerializerDto(ThreadListResponseDto)
-  async getThreads(@Req() req: { user: UserWithPermissions }, @Param() param: ThreadParamDto) {
+  async getThreads(@Req() req: { user: UserWithPermissions }, @Param() param: ContactParamDto) {
     return await this.threadsService.getThreads(req.user.id, param.contactId);
   }
 
