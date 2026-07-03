@@ -18,6 +18,11 @@ export const MessageParamSchema = z.object({
   threadId: IdIntSchema,
   id: IdIntSchema,
 });
+export const MessageThreadParamSchema = z.object({
+   contactId: IdIntSchema,
+  threadId: IdIntSchema,
+});
+export class MessageThreadParamDto extends createZodDto(MessageThreadParamSchema) {}
 export class MessageParamDto extends createZodDto(MessageParamSchema) {}
 export type MessageParamType = z.infer<typeof MessageParamSchema>;
 

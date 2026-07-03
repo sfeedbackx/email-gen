@@ -1,3 +1,5 @@
+import type { $ZodIssue } from "zod/v4/core"
+
 export const formatDate = (dateStr: string): string => {
   const now = new Date()
   const date = new Date(dateStr)
@@ -12,5 +14,22 @@ export const formatDate = (dateStr: string): string => {
   if (diffDays <= 7) return `${diffDays} days ago`
 
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  // → "Jun 13"
 }
+
+export const mapZodIssues = (issues: $ZodIssue[]): Record<string, string> => {
+  const fieldErrors: Record<string, string> = {}
+  issues.forEach((issue) => {
+    const field = String(issue.path[0])
+    if (field) fieldErrors[field] = issue.message
+  })
+  return fieldErrors
+}
+
+export const parseApiError = (issue: $ZodIssue[]): string => {
+  return issue[0].message;
+};
+
+export const makeKey = (contactId: number, threadId: number) =>
+  `${contactId}-${threadId}`;
+
+

@@ -70,7 +70,24 @@ services:
       migrate:
         condition: service_completed_successfully
     restart: unless-stopped
-
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities:
+                - gpu
+    volumes:
+        - ollama:/root/.ollama
+    ports:
+        - 11434:11434
+    container_name: ollama
+    image: ollama/ollama
 volumes:
   postgres_data:
   # redis_data:
+  ollama:
+      external: true
+      name: ollama

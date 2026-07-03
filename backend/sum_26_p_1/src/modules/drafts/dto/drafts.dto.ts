@@ -41,6 +41,12 @@ export const PromoteDraftParamSchema = z.object({
 export class PromoteDraftParamDto extends createZodDto(PromoteDraftParamSchema) { }
 export type PromoteDraftParamType = z.infer<typeof PromoteDraftParamSchema>;
 
+export const DraftThreatSchema = z.object({
+  contactId: IdIntSchema,
+  threadId: IdIntSchema,
+});
+export class DraftThreatDto extends createZodDto(DraftThreatSchema) { }
+
 // ─────────────────────────────────────────────
 // RESPONSE
 // ─────────────────────────────────────────────

@@ -71,3 +71,14 @@ export default defineConfig([
   },
 ])
 ```
+
+
+```
+Pages       → PascalCase + Page suffix  (ContactsPage.tsx)
+Components  → PascalCase, singular      (MessageBox.tsx)
+Hooks       → camelCase, plural         (useMessages.ts)
+Stores      → camelCase + Store suffix  (messagesStore.ts)
+Types       → kebab-case + .types.ts    (contact.types.ts)
+Schemas     → kebab-case + .schema.ts   (contact.schema.ts)
+Context     → PascalCase + Context      (ContactContext.tsx)
+```

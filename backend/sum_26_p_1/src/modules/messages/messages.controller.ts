@@ -16,6 +16,7 @@ import {
   MessageParamDto,
   MessageListResponseDto,
   MessageSingleResponseDto,
+  MessageThreadParamDto,
 } from './dto/messages.dto';
 import { UserWithPermissions } from '@modules/users/dto/users.dto';
 
@@ -25,7 +26,7 @@ export class MessagesController {
 
   @Get()
   @ZodSerializerDto(MessageListResponseDto)
-  async getMessages(@Req() req: { user: UserWithPermissions }, @Param() param: MessageParamDto) {
+  async getMessages(@Req() req: { user: UserWithPermissions }, @Param() param: MessageThreadParamDto) {
     const data = await this.messagesService.getMessages(
       req.user.id,
       param.contactId,
@@ -39,7 +40,7 @@ export class MessagesController {
   @ZodSerializerDto(MessageSingleResponseDto)
   async createMessage(
     @Req() req: { user: UserWithPermissions },
-    @Param() param: MessageParamDto,
+    @Param() param: MessageThreadParamDto,
     @Body() body: CreateMessageDto,
   ) {
     const data = await this.messagesService.createMessage(
