@@ -1,3 +1,4 @@
+import { UserWithPermissions } from '@modules/users/dto/users.dto';
 import {
   Body,
   Controller,
@@ -12,7 +13,6 @@ import {
 } from '@nestjs/common';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { ContactsService } from './contacts.service';
-import { UserWithPermissions } from '@modules/users/dto/users.dto';
 import {
   ContactListResponseDto,
   ContactParamDto,
@@ -24,7 +24,7 @@ import {
 
 @Controller('contacts')
 export class ContactsController {
-  constructor(private readonly contactsService: ContactsService) { }
+  constructor(private readonly contactsService: ContactsService) {}
 
   @Get()
   @ZodSerializerDto(ContactListResponseDto)
@@ -59,6 +59,6 @@ export class ContactsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ZodSerializerDto(ContactSingleResponseDto)
   async deleteContact(@Req() req: { user: UserWithPermissions }, @Param() param: ContactParamDto) {
-     await this.contactsService.deleteContact(req.user.id, param.id);
+    await this.contactsService.deleteContact(req.user.id, param.id);
   }
 }

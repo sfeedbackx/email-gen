@@ -1,3 +1,5 @@
+import { MessageSingleResponseDto } from '@modules/messages/dto/messages.dto';
+import { UserWithPermissions } from '@modules/users/dto/users.dto';
 import {
   Body,
   Controller,
@@ -13,19 +15,17 @@ import {
 import { ZodSerializerDto } from 'nestjs-zod';
 import { DraftsService } from './drafts.service';
 import {
-  GenerateDraftDto,
-  UpdateDraftDto,
-  DraftParamDto,
   DraftListResponseDto,
+  DraftParamDto,
   DraftSingleResponseDto,
   DraftThreatDto,
+  GenerateDraftDto,
+  UpdateDraftDto,
 } from './dto/drafts.dto';
-import { MessageSingleResponseDto } from '@modules/messages/dto/messages.dto';
-import { UserWithPermissions } from '@modules/users/dto/users.dto';
 
 @Controller('contacts/:contactId/threads/:threadId/drafts')
 export class DraftsController {
-  constructor(private readonly draftsService: DraftsService) { }
+  constructor(private readonly draftsService: DraftsService) {}
 
   @Get()
   @ZodSerializerDto(DraftListResponseDto)

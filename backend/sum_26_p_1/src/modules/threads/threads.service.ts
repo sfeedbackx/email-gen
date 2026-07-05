@@ -1,20 +1,20 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { ThreadsRepository } from './threads.repository';
+import { takeUniqueOrThrow } from '@database/drizzle/helper';
 import { ContactsRepository } from '@modules/contacts/contacts.repository';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import {
   CreateThreadType,
   ThreadResponseType,
   ThreadWithDetailsResponseType,
   UpdateThreadType,
 } from './dto/threads.dto';
-import { takeUniqueOrThrow } from '@database/drizzle/helper';
+import { ThreadsRepository } from './threads.repository';
 
 @Injectable()
 export class ThreadsService {
   constructor(
     private readonly threadRepository: ThreadsRepository,
     private readonly contactRepository: ContactsRepository,
-  ) { }
+  ) {}
 
   async createThread(
     userId: string,

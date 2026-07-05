@@ -1,34 +1,19 @@
-import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-import "./App.css";
-import { ROUTES } from "./utils/constants";
-import { Signup } from "./pages/auth/Signup.tsx";
-import { Login } from "./pages/auth/Login.tsx";
-import Home from "./pages/Home";
-import { Threads } from "./pages/threads/ThreadsPage.tsx";
-import { Messages } from "./pages/messages/MessagesPage.tsx";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ContactProvider } from "./context/ContactContext.tsx";
-import { Contacts } from "./pages/contacts/ContactsPage.tsx";
-import ProtectedRoute from "./routes/ProtectedRoute.tsx";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { ContactProvider } from './context/ContactContext.tsx';
+import { Login } from './pages/auth/Login.tsx';
+import { Signup } from './pages/auth/Signup.tsx';
+import { Contacts } from './pages/contacts/ContactsPage.tsx';
+import { Messages } from './pages/messages/MessagesPage.tsx';
+import { Threads } from './pages/threads/ThreadsPage.tsx';
+import ProtectedRoute from './routes/ProtectedRoute.tsx';
+import { ROUTES } from './utils/constants';
 
 const AppContent: React.FC = () => {
   return (
-    <main className='main-content flex'>
+    <main className="main-content flex">
       <Routes>
-        <Route
-          path={ROUTES.HOME}
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
         <Route path={ROUTES.LOGIN} element={<Login />} />
         <Route path={ROUTES.REGISTER} element={<Signup />} />
         <Route
@@ -68,19 +53,7 @@ const AppContent: React.FC = () => {
             </ProtectedRoute>
           }
         />
-
-        {/*  PROTECTED CTF */}
-        {/*   <Route
-            path={ROUTES.CHALLENGES}
-            element={
-              <ProtectedRoute>
-                <Challenges />
-              </ProtectedRoute>
-            }
-          />
-          */}
-
-        <Route path='*' element={<Navigate to={ROUTES.LOGIN} replace />} />
+        <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />
       </Routes>
     </main>
   );

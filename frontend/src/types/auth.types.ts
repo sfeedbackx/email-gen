@@ -1,4 +1,4 @@
-import type { UserWithPermissions } from "./user.types";
+import type { UserWithPermissions } from './user.types';
 
 export type SignupData = {
   firstName: string;
@@ -7,7 +7,7 @@ export type SignupData = {
   password: string;
   confirmPassword: string;
   dateOfBirth: string;
-  gender: "MALE" | "FEMALE";
+  gender: 'MALE' | 'FEMALE';
 };
 
 export type LoginData = {

@@ -1,6 +1,17 @@
-import { DefaultString, EmailSchema, IntegerPosSchema, NullableString, NumberSchema, OptionalString } from '@common/validation';
+import {
+  DefaultString,
+  EmailSchema,
+  IntegerPosSchema,
+  NullableString,
+  NumberSchema,
+  OptionalString,
+} from '@common/validation';
 import { RoleSchema } from '@modules/roles/dto/role.dto';
-import { AuthProviderSchema, UserAttributesSchema, UserTypeSchema } from '@modules/users/dto/users.enums';
+import {
+  AuthProviderSchema,
+  UserAttributesSchema,
+  UserTypeSchema,
+} from '@modules/users/dto/users.enums';
 import z from 'zod';
 export const JwtPayloadSchema = z.object({
   sub: z.string(),

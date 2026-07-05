@@ -1,84 +1,56 @@
-# React + TypeScript + Vite
+# Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite client for EmailGen.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19 · TypeScript · Vite
+- TanStack Query · Zustand
+- Mantine UI · React Router
 
-## React Compiler
+## Run
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Dev (standalone)
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.example .env
+pnpm install
+pnpm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Docker
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.docker .env
+pnpm run build
+# Then run from the root compose file
 ```
 
+## Environment
 
-```
-Pages       → PascalCase + Page suffix  (ContactsPage.tsx)
-Components  → PascalCase, singular      (MessageBox.tsx)
-Hooks       → camelCase, plural         (useMessages.ts)
-Stores      → camelCase + Store suffix  (messagesStore.ts)
-Types       → kebab-case + .types.ts    (contact.types.ts)
-Schemas     → kebab-case + .schema.ts   (contact.schema.ts)
-Context     → PascalCase + Context      (ContactContext.tsx)
-```
+| Env file | Use |
+|---|---|
+| `.env.example` | Local dev, points `VITE_API_BASE_URL` at `localhost:3000` |
+| `.env.docker` | Docker Compose, sets `VITE_API_BASE_URL=/api` (nginx proxy) |
+
+`src/config/env.ts` exposes this value, and `src/lib/axios.ts` uses it for all API requests.
+
+## Folder Map
+
+- `src/pages`: page-level screens (auth, contacts, messages, threads)
+- `src/components`: shared UI
+- `src/hooks`: API query/mutation hooks
+- `src/store`: Zustand caches and cache update helpers
+- `src/schemas`: zod validation schemas
+- `src/context`: route-scoped context values (`contactId`, `threadId`)
+- `src/lib`: API client (`axios`)
+
+## Message Composer Behavior
+
+In `MessageSection`:
+
+- **Contact toggle OFF (gray)**: sends prompt to `drafts/generate`
+- **Contact toggle ON (green)**: posts direct `CONTACT` message
+
+Enter sends, Shift+Enter inserts newline.
+

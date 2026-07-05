@@ -27,7 +27,7 @@ export const RegisterSchema = z
     path: ['confirmPassword'],
   });
 
-export class RegisterDto extends createZodDto(RegisterSchema) { }
+export class RegisterDto extends createZodDto(RegisterSchema) {}
 
 // ─────────────────────────────────────────────
 // LOGIN
@@ -38,7 +38,7 @@ export const LoginSchema = z.object({
   password: PasswordSchema,
 });
 
-export class LoginDto extends createZodDto(LoginSchema) { }
+export class LoginDto extends createZodDto(LoginSchema) {}
 
 // ─────────────────────────────────────────────
 // Logout
@@ -47,11 +47,11 @@ export const LogoutResponseSchema = z.object({
   message: DefaultString,
 });
 
-export class LogoutDto extends createZodDto(LogoutResponseSchema) { }
+export class LogoutDto extends createZodDto(LogoutResponseSchema) {}
 
 export const AuthResponseSchema = z.object({
   accessToken: z.string(),
   refreshToken: z.string(),
 });
 export type AuthResponse = z.infer<typeof AuthResponseSchema>;
-export class AuthResponseDto extends createZodDto(AuthResponseSchema) { }
+export class AuthResponseDto extends createZodDto(AuthResponseSchema) {}

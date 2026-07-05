@@ -1,11 +1,11 @@
 import { contacts } from '@database/drizzle/schema';
 import { type DatabaseContext, InjectDB } from '@database/providers/database.provider';
 import { Injectable } from '@nestjs/common';
-import { eq, and } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 @Injectable()
 export class ContactsRepository {
-  constructor(@InjectDB() private readonly db: DatabaseContext) { }
+  constructor(@InjectDB() private readonly db: DatabaseContext) {}
   async createContact(data: Omit<typeof contacts.$inferInsert, 'id' | 'createdAt' | 'updatedAt'>) {
     const result = await this.db.insert(contacts).values(data).returning();
 

@@ -1,56 +1,98 @@
-import { useEffect, useState } from "react"
-import { draftContentUpdateSchema } from "../../../schemas/message.schema"
-import { usePatchDraft } from "../../../hooks/useDrafts"
-import { useContactIdContext } from "../../../context/ContactContext"
-import { useThreadIdContext } from "../../../context/ThreadContext"
+import { useEffect, useState } from 'react';
+import { useContactIdContext } from '../../../context/ContactContext';
+import { useThreadIdContext } from '../../../context/ThreadContext';
+import { deleteDraft, usePatchDraft, usePromoteDraft } from '../../../hooks/useDrafts';
+import { draftContentUpdateSchema } from '../../../schemas/message.schema';
+import { extractApiError } from '../../../utils/helpers';
 
 export default function MailBox(props: {
-  message: string
-  isLoading?: boolean
-  draftId: number,
-  onBack: () => void
+  message: string;
+  isLoading?: boolean;
+  draftId: number;
+  onBack: () => void;
 }) {
-  const [editable, setEditable] = useState(false)
-  const [message, setMessage] = useState(props.message)
-  const [error, setError] = useState<string>()
+  const [editable, setEditable] = useState(false);
+  const [message, setMessage] = useState(props.message);
+  const [mailError, setMailError] = useState<string>();
   const contactId = useContactIdContext();
-  const { threadId } = useThreadIdContext()
-  console.log(props.message);
+  const { threadId } = useThreadIdContext();
 
-  const { mutate: updateDraft, isPending } = usePatchDraft(setError, contactId, threadId, props.draftId)
+  const {
+    mutate: updateDraft,
+    isPending: isUpdating,
+    error: updateError,
+    isError: isUpdateError,
+  } = usePatchDraft(contactId, threadId, props.draftId);
+
+  const {
+    mutate: removeDraft,
+    isPending: isDeleting,
+    error: deleteError,
+    isError: isDeleteError,
+  } = deleteDraft(contactId, threadId);
+
+  const {
+    mutate: promoteDraft,
+    isPending: isPromoting,
+    error: promoteError,
+    isError: isPromoteError,
+  } = usePromoteDraft(contactId, threadId);
 
   useEffect(() => {
-    setMessage(props.message)
-    setEditable(false)
-  }, [props.message])
+    setMessage(props.message);
+    setEditable(false);
+  }, [props.message]);
 
   const handleUpdate = () => {
     if (!editable) {
-      return
+      return;
     }
 
     const result = draftContentUpdateSchema.safeParse({
-      content: message
+      content: message,
     });
 
     if (!result.success) {
       const errorMessage: string = result.error.issues[0].message;
-      console.log(errorMessage);
-
+      setMailError(errorMessage);
       return;
     }
 
-    console.log(result.data);
-    updateDraft(result.data)
-    setEditable(false)
-  }
+    setMailError(undefined);
+    updateDraft(result.data);
+    setEditable(false);
+  };
+
+  const handlePromote = () => {
+    setMailError(undefined);
+    promoteDraft(props.draftId, {
+      onSuccess: () => props.onBack(),
+    });
+  };
 
   const handleCancel = () => {
-    setMessage(props.message)
-    setEditable(false)
-    return
-  }
+    setMessage(props.message);
+    setEditable(false);
+    return;
+  };
+  useEffect(() => {
+    if (!isUpdateError) return;
+    const { issues, serverError } = extractApiError(updateError);
+    if (Array.isArray(issues)) setMailError(issues[0].message);
+    else setMailError(serverError);
+  }, [isUpdateError, updateError]);
 
+  useEffect(() => {
+    if (!isDeleteError) return;
+    const { serverError } = extractApiError(deleteError);
+    setMailError(serverError);
+  }, [isDeleteError, deleteError]);
+
+  useEffect(() => {
+    if (!isPromoteError) return;
+    const { serverError } = extractApiError(promoteError);
+    setMailError(serverError);
+  }, [isPromoteError, promoteError]);
   return (
     <>
       <div className="flex flex-col overflow-hidden w-full h-full">
@@ -68,46 +110,56 @@ export default function MailBox(props: {
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="text-sm/7 bg-gray-100 rounded-lg border p-1 h-4/5  resize-none  flex w-full  font-mono text-gray-800 whitespace-pre-wrap"
+            className="text-sm/7 bg-gray-100 rounded-lg border p-1 h-full resize-none  flex w-full  font-mono text-gray-800 whitespace-pre-wrap"
           />
         ) : (
-          <div className="text-sm/7 bg-gray-100 flex rounded-lg border mb-auto h-4/5 p-2 w-full overflow-y-auto font-mono text-gray-800 whitespace-pre-wrap ">
+          <div className="text-sm/7 bg-gray-100 flex rounded-lg border mb-auto h-full p-2 w-full overflow-y-auto font-mono text-gray-800 whitespace-pre-wrap ">
             {message}
           </div>
         )}
       </div>
+      {mailError && <div className="text-sm text-red-500">{mailError}</div>}
 
-      <div className=" mt-auto justify-between flex w-full">
-        <button
-          className="w-18 h-8 border text-center rounded-lg hover:bg-blue-50 hover:text-blue-500 active:scale-95 transition-all duration-150 cursor-pointer"
-          onClick={props.onBack}
-          disabled={props.isLoading}
-        >
-          back
-        </button>
+      <div className=" mt-6 justify-between flex w-full">
+        <div className="flex flex-row gap-2">
+          <button
+            className="w-18 h-8 border text-center rounded-lg hover:bg-blue-50 hover:text-blue-500 active:scale-95 transition-all duration-150 cursor-pointer"
+            onClick={props.onBack}
+            disabled={props.isLoading || isUpdating || isDeleting || isPromoting}
+          >
+            back
+          </button>
+          <button
+            className="w-18 h-8 border text-center rounded-lg text-red-500 hover:bg-red-50 hover:text-red-700 active:scale-95 transition-all duration-150 cursor-pointer"
+            onClick={() => removeDraft(props.draftId, { onSuccess: () => props.onBack() })}
+            disabled={props.isLoading || isUpdating || isDeleting || isPromoting}
+          >
+            Delete
+          </button>
+        </div>
         <div className="flex flex-row gap-3 items-center justify-center">
-
           <button
             className={` w-18 p-1 border text-center rounded-lg active:scale-95 transition-all duration-150 cursor-pointer
-            ${editable
+            ${
+              editable
                 ? 'hover:bg-red-50 hover:text-red-500'
                 : 'hover:bg-blue-50 hover:text-blue-500'
-              }`}
-            onClick={() => editable ? handleCancel() : setEditable(true)}
-            disabled={props.isLoading}
+            }`}
+            onClick={() => (editable ? handleCancel() : setEditable(true))}
+            disabled={props.isLoading || isUpdating || isDeleting || isPromoting}
           >
             {editable ? 'Cancel' : 'Edit'}
           </button>
           <button
             className={`w-18 p-1 border text-center rounded-lg active:scale-95 transition-all duration-150 cursor-pointer
                 hover:bg-emerald-50 hover:text-emerald-500`}
-            onClick={() => handleUpdate()}
-            disabled={props.isLoading}
+            onClick={() => (editable ? handleUpdate() : handlePromote())}
+            disabled={props.isLoading || isUpdating || isDeleting || isPromoting}
           >
             {editable ? 'Confirm' : 'Promote'}
           </button>
         </div>
       </div>
     </>
-  )
+  );
 }

@@ -1,15 +1,15 @@
+import { takeUniqueOrThrow } from '@database/drizzle/helper';
 import { ContactsRepository } from '@modules/contacts/contacts.repository';
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { DocumentsRepository } from './documents.repository';
 import { CreateDocumentType, DocumentResponseType, UpdateDocumentType } from './dto/documents.dto';
-import { takeUniqueOrThrow } from '@database/drizzle/helper';
 
 @Injectable()
 export class DocumentsService {
   constructor(
     private readonly documentRepository: DocumentsRepository,
     private readonly contactRepository: ContactsRepository,
-  ) { }
+  ) {}
 
   async createDocument(
     userId: string,

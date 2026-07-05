@@ -1,7 +1,7 @@
+import { UserAttributes, UserAttributesSchema } from '@modules/users/dto/users.enums';
 import { relations } from 'drizzle-orm';
 import * as t from 'drizzle-orm/pg-core';
 import { accountStatus, authProviderEnum, genderEnum, userTypeEnum } from './enums.schema';
-import { UserAttributes, UserAttributesSchema } from '@modules/users/dto/users.enums';
 // Permissions table
 export const permissions = t.pgTable(
   'permissions',
@@ -119,9 +119,7 @@ export const refreshTokens = t.pgTable(
   },
   (table) => [
     // Indexes
-    t
-      .index('refresh_tokens_user_id_idx')
-      .on(table.userId),
+    t.index('refresh_tokens_user_id_idx').on(table.userId),
   ],
 );
 

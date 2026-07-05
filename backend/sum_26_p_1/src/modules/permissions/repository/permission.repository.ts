@@ -1,12 +1,12 @@
 import { permissions, rolePermissions } from '@database/drizzle/schema/users.schema';
 import { type DatabaseContext, InjectDB } from '@database/providers/database.provider';
 import { Injectable } from '@nestjs/common';
-import { SQL, eq } from 'drizzle-orm';
+import { eq, SQL } from 'drizzle-orm';
 import { Permission } from '../dto/permission.dto';
 
 @Injectable()
 export class PermissionRepository {
-  constructor(@InjectDB() private readonly db: DatabaseContext) { }
+  constructor(@InjectDB() private readonly db: DatabaseContext) {}
 
   async getPermissionsForRole(roleId: number): Promise<Permission[]> {
     const result = await this.db

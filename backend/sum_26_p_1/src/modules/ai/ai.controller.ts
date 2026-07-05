@@ -2,15 +2,15 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/commo
 import { ZodSerializerDto } from 'nestjs-zod';
 import { AiService } from './ai.service';
 import {
-  GenerateEmailDto,
-  RefineEmailDto,
   AiResponseWrapperDto,
   AiStatusResponseWrapperDto,
+  GenerateEmailDto,
+  RefineEmailDto,
 } from './dto/ai.dto';
 
 @Controller('ai')
 export class AiController {
-  constructor(private readonly aiService: AiService) { }
+  constructor(private readonly aiService: AiService) {}
 
   @Post('generate')
   @HttpCode(HttpStatus.OK)

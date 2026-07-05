@@ -1,3 +1,4 @@
+import { UserWithPermissions } from '@modules/users/dto/users.dto';
 import {
   Body,
   Controller,
@@ -10,23 +11,25 @@ import {
   Req,
 } from '@nestjs/common';
 import { ZodSerializerDto } from 'nestjs-zod';
-import { MessagesService } from './messages.service';
 import {
   CreateMessageDto,
-  MessageParamDto,
   MessageListResponseDto,
+  MessageParamDto,
   MessageSingleResponseDto,
   MessageThreadParamDto,
 } from './dto/messages.dto';
-import { UserWithPermissions } from '@modules/users/dto/users.dto';
+import { MessagesService } from './messages.service';
 
 @Controller('contacts/:contactId/threads/:threadId/messages')
 export class MessagesController {
-  constructor(private readonly messagesService: MessagesService) { }
+  constructor(private readonly messagesService: MessagesService) {}
 
   @Get()
   @ZodSerializerDto(MessageListResponseDto)
-  async getMessages(@Req() req: { user: UserWithPermissions }, @Param() param: MessageThreadParamDto) {
+  async getMessages(
+    @Req() req: { user: UserWithPermissions },
+    @Param() param: MessageThreadParamDto,
+  ) {
     const data = await this.messagesService.getMessages(
       req.user.id,
       param.contactId,

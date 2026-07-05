@@ -1,15 +1,17 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { api } from "../lib/axios";
-import useDraftStore from "../store/draftsStore";
-import type { Draft } from "../types/draft.types";
-import type { DraftContentUpdate, Prompt } from "../schemas/message.schema";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { api } from '../lib/axios';
+import type { DraftContentUpdate, Prompt } from '../schemas/message.schema';
+import useDraftStore from '../store/draftsStore';
+import useMessageStore from '../store/messagesStore';
+import type { Draft } from '../types/draft.types';
+import type { MessageType } from '../types/message.types';
 
 export const getDrafts = (contactId: number, threadId: number) => {
   const { drafts, setDrafts, isExpired } = useDraftStore();
   const cache = drafts[`${contactId}-${threadId}`];
 
   return useQuery({
-    queryKey: ["getDrafts", contactId, threadId],
+    queryKey: ['getDrafts', contactId, threadId],
     queryFn: async (): Promise<Draft[]> => {
       if (!isExpired(contactId, threadId) && cache?.data) return cache.data;
       const res = await api
@@ -27,74 +29,94 @@ export const getDrafts = (contactId: number, threadId: number) => {
     refetchOnWindowFocus: false,
   });
 };
-export const useGenDraft = (
-  setErrors: (errors: string) => void,
-  contactId: number,
-  threadId: number | undefined,
-  setSelectedDraft: (d: Draft | null) => void,
-) => {
-  const { appendDraft } = useDraftStore();
-
+export const deleteDraft = (contactId: number, threadId: number | undefined) => {
+  const { removeDraft } = useDraftStore();
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: Prompt) => {
-      if (!contactId || !threadId)
-        return Promise.reject(new Error("Missing contactId or threadId"));
-      return api
-        .post(
-          `/contacts/${contactId}/threads/${threadId}/drafts/generate`,
-          data,
-        )
-        .then((res) => res.data.data);
-    },
-    onSuccess: (res) => {
-      setSelectedDraft(res);
-      appendDraft(contactId, threadId!, res);
-    },
-    onError: (error: any) => {
-      const issues = error.response?.data?.errors;
-      const serverError = error.response?.data?.message;
-      if (Array.isArray(issues)) {
-        setErrors(issues[0].message);
-      } else if (serverError) {
-        setErrors(serverError);
-      } else {
-        setErrors(error.message);
+    mutationFn: (draftId: number) =>
+      api
+        .delete(`/contacts/${contactId}/threads/${threadId}/drafts/${draftId}`)
+        .then((res) => res.data),
+    onSuccess: (_, draftId) => {
+      if (threadId) {
+        removeDraft(contactId, threadId, draftId);
+        queryClient.setQueryData<Draft[]>(['getDrafts', contactId, threadId], (prev = []) =>
+          prev.filter((draft) => draft.id !== draftId),
+        );
       }
     },
   });
 };
-export const usePatchDraft = (
-  setErrors: (errors: string) => void,
-  contactId: number,
-  threadId: number | undefined,
-  draftId : number,
-) => {
+
+export const useGenDraft = (contactId: number, threadId: number | undefined) => {
   const { appendDraft } = useDraftStore();
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: DraftContentUpdate) => {
-      if (!contactId || !threadId || !draftId)
-        return Promise.reject(new Error("Missing contactId, threadId, or draftId"));
+    mutationFn: async (data: Prompt) => {
+      if (!contactId || !threadId)
+        return Promise.reject(new Error('Missing contactId or threadId'));
       return api
-        .patch(
-          `/contacts/${contactId}/threads/${threadId}/drafts/${draftId}`,
-          data,
-        )
+        .post(`/contacts/${contactId}/threads/${threadId}/drafts/generate`, data)
         .then((res) => res.data.data);
     },
     onSuccess: (res) => {
       appendDraft(contactId, threadId!, res);
+      queryClient.setQueryData<Draft[]>(['getDrafts', contactId, threadId], (prev = []) => [
+        ...prev,
+        res,
+      ]);
     },
-    onError: (error: any) => {
-      const issues = error.response?.data?.errors;
-      const serverError = error.response?.data?.message;
-      if (Array.isArray(issues)) {
-        setErrors(issues[0].message);
-      } else if (serverError) {
-        setErrors(serverError);
-      } else {
-        setErrors(error.message);
-      }
+  });
+};
+export const usePatchDraft = (contactId: number, threadId: number | undefined, draftId: number) => {
+  const { upsertDraft } = useDraftStore();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: DraftContentUpdate) => {
+      if (!contactId || !threadId || !draftId)
+        return Promise.reject(new Error('Missing contactId, threadId, or draftId'));
+      return api
+        .patch(`/contacts/${contactId}/threads/${threadId}/drafts/${draftId}`, data)
+        .then((res) => res.data.data);
+    },
+    onSuccess: (res) => {
+      upsertDraft(contactId, threadId!, res);
+      queryClient.setQueryData<Draft[]>(['getDrafts', contactId, threadId], (prev = []) => {
+        const exists = prev.some((draft) => draft.id === res.id);
+        if (exists) {
+          return prev.map((draft) => (draft.id === res.id ? res : draft));
+        }
+        return [...prev, res];
+      });
+    },
+  });
+};
+
+export const usePromoteDraft = (contactId: number, threadId: number | undefined) => {
+  const { removeDraft } = useDraftStore();
+  const { appendMessage } = useMessageStore();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (draftId: number): Promise<MessageType> => {
+      if (!contactId || !threadId)
+        return Promise.reject(new Error('Missing contactId or threadId'));
+      return api
+        .post(`/contacts/${contactId}/threads/${threadId}/drafts/${draftId}/promote`)
+        .then((res) => res.data.data);
+    },
+    onSuccess: (res, draftId) => {
+      removeDraft(contactId, threadId!, draftId);
+      appendMessage(contactId, threadId!, res);
+      queryClient.setQueryData<Draft[]>(['getDrafts', contactId, threadId], (prev = []) =>
+        prev.filter((draft) => draft.id !== draftId),
+      );
+      queryClient.setQueryData<MessageType[]>(['getMessages', contactId, threadId], (prev = []) => [
+        ...prev,
+        res,
+      ]);
     },
   });
 };

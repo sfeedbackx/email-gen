@@ -1,10 +1,11 @@
+import { UserType } from '@modules/users/dto/users.enums';
 import { config } from 'dotenv';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { reset } from 'drizzle-seed';
 import { Pool } from 'pg';
 import * as schema from './schema';
 import { permissionDataToSeed, rolesDataToSeed, rolesPermissionDataToSeed } from './seed/data.seed';
-import { UserType } from '@modules/users/dto/users.enums';
+
 config({ path: '.env' });
 
 const runSeed = async () => {

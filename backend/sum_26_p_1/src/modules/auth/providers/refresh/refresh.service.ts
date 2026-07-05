@@ -1,11 +1,11 @@
 import * as crypto from 'node:crypto';
+import { takeUniqueOrThrow } from '@database/drizzle/helper';
 import { refreshTokens } from '@database/drizzle/schema';
 import { type DatabaseContext, InjectDB } from '@database/providers/database.provider';
+import { RefreshToken } from '@modules/auth/dto/tokens.dto';
 import { ForbiddenException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { and, eq, isNull } from 'drizzle-orm';
-import { takeUniqueOrThrow } from '@database/drizzle/helper';
-import { RefreshToken } from '@modules/auth/dto/tokens.dto';
 
 @Injectable()
 export class RefreshProvider {
@@ -13,7 +13,7 @@ export class RefreshProvider {
   constructor(
     @InjectDB() private db: DatabaseContext,
     private configService: ConfigService,
-  ) { }
+  ) {}
 
   async generateRefreshToken(
     userId: string,

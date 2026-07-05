@@ -4,7 +4,7 @@ import { EnvironmentVariables } from './validation';
 
 @Injectable()
 export class AppConfigService {
-  constructor(private readonly configService: ConfigService<EnvironmentVariables, true>) { }
+  constructor(private readonly configService: ConfigService<EnvironmentVariables, true>) {}
 
   get nodeEnv(): string {
     return this.configService.get('NODE_ENV', { infer: true });
@@ -49,10 +49,10 @@ export class AppConfigService {
     return this.configService.get<number>('MAX_AGE', { infer: true }) || 7 * 24 * 60 * 60 * 1000;
   }
   get ollamaHost(): string {
-  return this.configService.get<string>('OLLAMA_HOST') ?? 'http://localhost:11434';
-}
+    return this.configService.get<string>('OLLAMA_HOST') ?? 'http://localhost:11434';
+  }
 
-get ollamaModel(): string {
-  return this.configService.get<string>('OLLAMA_MODEL') ?? 'mistral';
-}
+  get ollamaModel(): string {
+    return this.configService.get<string>('OLLAMA_MODEL') ?? 'mistral';
+  }
 }

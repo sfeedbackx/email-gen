@@ -4,10 +4,10 @@ import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nes
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-
 @Injectable()
 export class TransformInterceptor<T extends object>
-  implements NestInterceptor<T, TransformShape<T>> {
+  implements NestInterceptor<T, TransformShape<T>>
+{
   intercept(context: ExecutionContext, next: CallHandler<T>): Observable<TransformShape<T>> {
     const statusCode = context.switchToHttp().getResponse().statusCode ?? 200;
 

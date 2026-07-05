@@ -1,7 +1,6 @@
 import type { Config } from 'drizzle-kit';
 import z from 'zod';
 
-
 const databaseUrl = z.url().trim();
 const result = databaseUrl.safeParse(process.env.DATABASE_URL);
 

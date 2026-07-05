@@ -1,3 +1,4 @@
+import { UserWithPermissions } from '@modules/users/dto/users.dto';
 import {
   Body,
   Controller,
@@ -14,15 +15,14 @@ import { ZodSerializerDto } from 'nestjs-zod';
 import { DocumentsService } from './documents.service';
 import {
   CreateDocumentDto,
-  UpdateDocumentDto,
-  DocumentParamDto,
   DocumentListResponseDto,
+  DocumentParamDto,
   DocumentSingleResponseDto,
+  UpdateDocumentDto,
 } from './dto/documents.dto';
-import { UserWithPermissions } from '@modules/users/dto/users.dto';
 @Controller('contacts/:contactId/documents')
 export class DocumentsController {
-  constructor(private readonly documentsService: DocumentsService) { }
+  constructor(private readonly documentsService: DocumentsService) {}
 
   @Get()
   @ZodSerializerDto(DocumentListResponseDto)

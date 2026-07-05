@@ -1,11 +1,15 @@
-import { DefaultString, IntegerPosSchema, NullableString, OptionalString } from '@common/validation';
+import {
+  DefaultString,
+  IntegerPosSchema,
+  NullableString,
+  OptionalString,
+} from '@common/validation';
 import { UserTypeSchema } from '@modules/users/dto/users.enums';
 import { z } from 'zod/v4';
 
 // ─────────────────────────────────────────────
 // SCHEMAS
 // ─────────────────────────────────────────────
-
 
 export const RoleSchema = z.object({
   id: IntegerPosSchema,
@@ -14,7 +18,6 @@ export const RoleSchema = z.object({
   description: OptionalString,
 });
 export type Role = z.infer<typeof RoleSchema>;
-
 
 export const RolePermissionSchema = z.object({
   id: IntegerPosSchema,

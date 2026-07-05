@@ -1,3 +1,4 @@
+import { UserWithPermissions } from '@modules/users/dto/users.dto';
 import {
   Body,
   Controller,
@@ -11,21 +12,20 @@ import {
   Req,
 } from '@nestjs/common';
 import { ZodSerializerDto } from 'nestjs-zod';
-import { ThreadsService } from './threads.service';
 import {
+  ContactParamDto,
   CreateThreadDto,
-  UpdateThreadDto,
-  ThreadParamDto,
   ThreadListResponseDto,
+  ThreadParamDto,
   ThreadSingleResponseDto,
   ThreadWithDetailsResponseWrapperDto,
-  ContactParamDto,
+  UpdateThreadDto,
 } from './dto/threads.dto';
-import { UserWithPermissions } from '@modules/users/dto/users.dto';
+import { ThreadsService } from './threads.service';
 
 @Controller('contacts/:contactId/threads')
 export class ThreadsController {
-  constructor(private readonly threadsService: ThreadsService) { }
+  constructor(private readonly threadsService: ThreadsService) {}
 
   @Get()
   @ZodSerializerDto(ThreadListResponseDto)

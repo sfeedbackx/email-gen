@@ -1,12 +1,10 @@
-import { create } from "zustand";
-import { jwtDecode } from "jwt-decode";
-import type { UserWithPermissions } from "../types/user.types";
-import type { JwtPayload } from "../types/rbac.types";
-import type { AuthStore } from "../types/auth.types";
+import { jwtDecode } from 'jwt-decode';
+import { create } from 'zustand';
+import type { AuthStore } from '../types/auth.types';
+import type { JwtPayload } from '../types/rbac.types';
+import type { UserWithPermissions } from '../types/user.types';
 
-export const mapToUserWithPermission = (
-  jwt: JwtPayload,
-): UserWithPermissions => {
+export const mapToUserWithPermission = (jwt: JwtPayload): UserWithPermissions => {
   return {
     id: jwt.sub,
     userType: jwt.type,
@@ -33,8 +31,8 @@ const useAuthStore = create<AuthStore>()((set) => ({
   },
 
   logout: () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("auth-storage");
+    localStorage.removeItem('token');
+    localStorage.removeItem('auth-storage');
     set({ token: null, user: null });
   },
 }));

@@ -1,6 +1,6 @@
+import { ContentSchema, IdIntSchema } from '@common/validation';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
-import { ContentSchema, IdIntSchema } from '@common/validation';
 
 // ─────────────────────────────────────────────
 // REQUEST
@@ -14,12 +14,12 @@ export class CreateMessageDto extends createZodDto(CreateMessageSchema) {}
 export type CreateMessageType = z.infer<typeof CreateMessageSchema>;
 
 export const MessageParamSchema = z.object({
-   contactId: IdIntSchema,
+  contactId: IdIntSchema,
   threadId: IdIntSchema,
   id: IdIntSchema,
 });
 export const MessageThreadParamSchema = z.object({
-   contactId: IdIntSchema,
+  contactId: IdIntSchema,
   threadId: IdIntSchema,
 });
 export class MessageThreadParamDto extends createZodDto(MessageThreadParamSchema) {}

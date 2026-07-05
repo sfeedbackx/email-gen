@@ -1,12 +1,12 @@
+import { takeUniqueOrThrow } from '@database/drizzle/helper';
+import { AiService } from '@modules/ai/ai.service';
+import { ContactsRepository } from '@modules/contacts/contacts.repository';
+import { MessageResponseType } from '@modules/messages/dto/messages.dto';
+import { MessagesRepository } from '@modules/messages/messages.repository';
+import { ThreadsRepository } from '@modules/threads/threads.repository';
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { DraftsRepository } from './drafts.repository';
-import { ThreadsRepository } from '@modules/threads/threads.repository';
-import { ContactsRepository } from '@modules/contacts/contacts.repository';
-import { MessagesRepository } from '@modules/messages/messages.repository';
 import { DraftResponseType, GenerateDraftType, UpdateDraftType } from './dto/drafts.dto';
-import { AiService } from '@modules/ai/ai.service';
-import { takeUniqueOrThrow } from '@database/drizzle/helper';
-import { MessageResponseType } from '@modules/messages/dto/messages.dto';
 
 @Injectable()
 export class DraftsService {
@@ -16,7 +16,7 @@ export class DraftsService {
     private readonly contactRepository: ContactsRepository,
     private readonly messageRepository: MessagesRepository,
     private readonly aiService: AiService,
-  ) { }
+  ) {}
 
   async generateDraft(
     userId: string,
@@ -79,7 +79,7 @@ export class DraftsService {
     draftId: number,
     data: UpdateDraftType,
   ): Promise<DraftResponseType> {
-    const [contact, thread] = await Promise.all([
+    await Promise.all([
       this.contactRepository
         .findById(contactId, userId)
         .then((value) => takeUniqueOrThrow(value, new NotFoundException('Contact not found'))),
@@ -106,8 +106,8 @@ export class DraftsService {
     contactId: number,
     threadId: number,
     draftId: number,
-  ): Promise<void> {
-    const [contact, thread] = await Promise.all([
+  ): Promise<DraftResponseType> {
+    await Promise.all([
       this.contactRepository
         .findById(contactId, userId)
         .then((value) => takeUniqueOrThrow(value, new NotFoundException('Contact not found'))),
@@ -120,12 +120,11 @@ export class DraftsService {
       .findById(draftId, threadId)
       .then((value) => takeUniqueOrThrow(value, new NotFoundException('Draft not found')));
 
-    const deleted = await this.draftRepository
+    return this.draftRepository
       .deleteDraft(draftId, threadId)
       .then((value) =>
         takeUniqueOrThrow(value, new InternalServerErrorException('Draft not deleted')),
       );
-    return;
   }
 
   async promoteDraft(
@@ -134,7 +133,7 @@ export class DraftsService {
     threadId: number,
     draftId: number,
   ): Promise<MessageResponseType> {
-    const [contact, thread] = await Promise.all([
+    await Promise.all([
       this.contactRepository
         .findById(contactId, userId)
         .then((value) => takeUniqueOrThrow(value, new NotFoundException('Contact not found'))),

@@ -5,21 +5,21 @@ import { PermissionsModule } from '@modules/permissions/permissions.module';
 import { RolesModule } from '@modules/roles/roles.module';
 import { Module } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { ZodValidationPipe } from 'nestjs-zod';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppConfigModule } from './config/config.module';
 import { DatabaseModule } from './database/database.module';
-import { TransformInterceptor } from './interceptors/transform';
-import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/users/users.module';
-import { ZodValidationPipe } from 'nestjs-zod';
 import { LoggingInterceptor } from './interceptors/logging';
+import { TransformInterceptor } from './interceptors/transform';
+import { AiModule } from './modules/ai/ai.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { ContactsModule } from './modules/contacts/contacts.module';
 import { DocumentsModule } from './modules/documents/documents.module';
-import { ThreadsModule } from './modules/threads/threads.module';
-import { MessagesModule } from './modules/messages/messages.module';
 import { DraftsModule } from './modules/drafts/drafts.module';
-import { AiModule } from './modules/ai/ai.module';
+import { MessagesModule } from './modules/messages/messages.module';
+import { ThreadsModule } from './modules/threads/threads.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
@@ -64,7 +64,6 @@ import { AiModule } from './modules/ai/ai.module';
     },
 
     AppService,
-
   ],
 })
-export class AppModule { }
+export class AppModule {}

@@ -1,15 +1,19 @@
-import axios from 'axios'
-import useAuthStore from '../store/authStore'
+import axios from 'axios';
+import { env } from '../config/env';
+import useAuthStore from '../store/authStore';
+import { AUTH_PREFIX } from '../utils/constants';
+
 export const api = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: env.apiBaseUrl,
   headers: {
     'Content-Type': 'application/json',
-  }
-})
+  },
+});
 
-// auto attach token to every request
 api.interceptors.request.use((config) => {
-const token = useAuthStore.getState().token
-  if (token) config.headers.Authorization = `Bearer ${token}`
-  return config
-})
+  const token = useAuthStore.getState().token;
+  if (token) {
+    config.headers.Authorization = `${AUTH_PREFIX}${token}`;
+  }
+  return config;
+});

@@ -1,8 +1,8 @@
 import { relations } from 'drizzle-orm';
 import * as t from 'drizzle-orm/pg-core';
 import { contacts } from './contacts.schema';
-import { messages } from './messages.schema';
 import { drafts } from './drafts.schema';
+import { messages } from './messages.schema';
 
 export const threads = t.pgTable('threads', {
   id: t.bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),

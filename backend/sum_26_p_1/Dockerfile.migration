@@ -1,0 +1,28 @@
+FROM node:22.14.0-alpine
+
+WORKDIR /app
+
+# Set pnpm global bin
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+# Copy package files
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./
+
+# Install dependencies (including dev dependencies needed for drizzle-kit)
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+
+# Copy source files needed for migrations
+COPY tsconfig.json ./
+COPY src ./src
+
+# Create migrations directory with proper permissions
+RUN mkdir -p /app/src/database/drizzle && \
+    chown -R node:node /app
+
+# Use node user 
+USER node
+
+# Default command (can be overridden in docker-compose)
+CMD ["sh", "-c", "npm run db:generate && npm run db:migrate"]

@@ -1,6 +1,6 @@
+import { AppConfigService } from '@config/config.service';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { Ollama } from 'ollama';
-import { AppConfigService } from '@config/config.service';
 import { GenerateEmailType, RefineEmailType } from './dto/ai.dto';
 
 @Injectable()

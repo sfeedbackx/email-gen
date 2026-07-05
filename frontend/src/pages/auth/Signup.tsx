@@ -1,22 +1,19 @@
 import {
+  Anchor,
   Box,
+  Button,
   Center,
   Flex,
-  TextInput,
   PasswordInput,
   Select,
   Text,
-  Anchor,
-  Button,
-} from "@mantine/core";
-import { useState } from "react";
-import { useSignup } from "../../hooks/useAuth";
-import { mapZodIssues } from "../../utils/helpers";
-import {
-  signupSchema,
-  type SignupForm,
-  type SignupFormErrors,
-} from "../../schemas/auth.schema";
+  TextInput,
+} from '@mantine/core';
+import { HttpStatusCode } from 'axios';
+import { useEffect, useState } from 'react';
+import { useSignup } from '../../hooks/useAuth';
+import { type SignupForm, type SignupFormErrors, signupSchema } from '../../schemas/auth.schema';
+import { extractApiError, mapZodIssues } from '../../utils/helpers';
 
 export const Signup = () => {
   const [dateSet, setDateSet] = useState(false);
@@ -27,7 +24,7 @@ export const Signup = () => {
 
   const [errors, setErrors] = useState<SignupFormErrors>({});
 
-  const { mutate: signup, isPending } = useSignup(setErrors, setServerError);
+  const { mutate: signup, isPending, isError, error } = useSignup();
 
   const handleChange = (field: keyof SignupForm, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -46,72 +43,81 @@ export const Signup = () => {
     signup(result.data);
   };
 
+  useEffect(() => {
+    if (!isError) return;
+    const { issues, serverError: serverErr, status } = extractApiError(error);
+
+    if (status === HttpStatusCode.Conflict && /email/.test(serverErr)) {
+      setErrors({ email: serverErr });
+      return;
+    }
+    if (Array.isArray(issues)) {
+      setErrors(mapZodIssues(issues));
+      return;
+    }
+    setServerError(serverErr ?? 'Something went wrong');
+  }, [isError, error]);
+
   return (
     <div>
-      <Center
-        className='w-screen h-screen'
-        bg='var(--mantine-color-gray-light)'
-      >
+      <Center className="w-screen h-screen" bg="var(--mantine-color-gray-light)">
         <Box w={400}>
-          <Flex gap='md'>
+          <Flex gap="md">
             <TextInput
-              className='flex-1'
-              label='First Name'
-              placeholder='Mark'
-              classNames={{ label: "text-blue-500 font-semibold" }}
+              className="flex-1"
+              label="First Name"
+              placeholder="First name"
+              classNames={{ label: 'text-blue-500 font-semibold' }}
               error={errors.firstName}
-              onChange={(e) => handleChange("firstName", e.target.value)}
+              onChange={(e) => handleChange('firstName', e.target.value)}
             />
             <TextInput
-              className='flex-1'
-              label='Last Name'
-              placeholder='Chen'
-              classNames={{ label: "text-blue-500 font-semibold" }}
+              className="flex-1"
+              label="Last Name"
+              placeholder="Last name"
+              classNames={{ label: 'text-blue-500 font-semibold' }}
               error={errors.lastName}
-              onChange={(e) => handleChange("lastName", e.target.value)}
+              onChange={(e) => handleChange('lastName', e.target.value)}
             />
           </Flex>
 
           <TextInput
-            mt='md'
-            label='Email'
-            placeholder='test@gmail.com'
-            classNames={{ label: "text-blue-500 font-semibold" }}
+            mt="md"
+            label="Email"
+            placeholder="email@example.com"
+            classNames={{ label: 'text-blue-500 font-semibold' }}
             error={errors.email}
-            onChange={(e) => handleChange("email", e.target.value)}
+            onChange={(e) => handleChange('email', e.target.value)}
           />
 
           <PasswordInput
-            mt='md'
-            label='Password'
-            placeholder='#Test1235'
-            classNames={{ label: "text-blue-500 font-semibold" }}
+            mt="md"
+            label="Password"
+            placeholder="Password"
+            classNames={{ label: 'text-blue-500 font-semibold' }}
             error={errors.password}
-            onChange={(e) => handleChange("password", e.target.value)}
+            onChange={(e) => handleChange('password', e.target.value)}
           />
 
           <PasswordInput
-            mt='md'
-            label='Confirm Password'
-            placeholder='#Test1235'
-            classNames={{ label: "text-blue-500 font-semibold" }}
+            mt="md"
+            label="Confirm Password"
+            placeholder="Confirm password"
+            classNames={{ label: 'text-blue-500 font-semibold' }}
             error={errors.confirmPassword}
-            onChange={(e) => handleChange("confirmPassword", e.target.value)}
+            onChange={(e) => handleChange('confirmPassword', e.target.value)}
           />
 
           <TextInput
-            mt='md'
-            label='Date of Birth'
-            type='date'
-            classNames={{ label: "text-blue-500 font-semibold" }}
-            styles={{ input: { color: !dateSet ? "#9ca3af" : "" } }}
+            mt="md"
+            label="Date of Birth"
+            type="date"
+            classNames={{ label: 'text-blue-500 font-semibold' }}
+            styles={{ input: { color: !dateSet ? '#9ca3af' : '' } }}
             error={errors.dateOfBirth}
             onChange={(e) => {
-              handleChange("dateOfBirth", e.target.value);
-              if (
-                e.target.value.trim().length == 0 ||
-                e.target.value.trim() === ""
-              ) {
+              handleChange('dateOfBirth', e.target.value);
+              if (e.target.value.trim().length == 0 || e.target.value.trim() === '') {
                 setDateSet(false);
               } else {
                 setDateSet(true);
@@ -120,30 +126,30 @@ export const Signup = () => {
           />
 
           <Select
-            mt='md'
-            label='Gender'
-            placeholder='Select gender'
-            classNames={{ label: "text-blue-500 font-semibold" }}
+            mt="md"
+            label="Gender"
+            placeholder="Select gender"
+            classNames={{ label: 'text-blue-500 font-semibold' }}
             error={errors.gender}
             data={[
-              { value: "MALE", label: "Male" },
-              { value: "FEMALE", label: "Female" },
+              { value: 'MALE', label: 'Male' },
+              { value: 'FEMALE', label: 'Female' },
             ]}
-            onChange={(value) => handleChange("gender", value ?? "")}
+            onChange={(value) => handleChange('gender', value ?? '')}
           />
-          <div className='flex w-full  mt-5 flex-col gap-4'>
+          <div className="flex w-full  mt-5 flex-col gap-4">
             {serverError && (
-              <Text c='red' size='sm' ta='center'>
+              <Text c="red" size="sm" ta="center">
                 {serverError}
               </Text>
             )}
-            <Button mt='' fullWidth onClick={onSubmit} loading={isPending}>
+            <Button mt="" fullWidth onClick={onSubmit} loading={isPending}>
               Sign Up
             </Button>
           </div>
-          <Text mt='md' ta='center' size='sm' c='dimmed'>
-            Already have an account?{" "}
-            <Anchor href='/login' size='sm'>
+          <Text mt="md" ta="center" size="sm" c="dimmed">
+            Already have an account?{' '}
+            <Anchor href="/login" size="sm">
               Login
             </Anchor>
           </Text>

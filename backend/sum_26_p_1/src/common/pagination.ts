@@ -104,16 +104,13 @@ export type StandardResponse<T extends z.ZodType> = z.infer<
   ReturnType<typeof StandardResponseSchema<T>>
 >;
 
-export type PaginationResponse<T extends z.ZodType> = z.infer<
-typeof PaginationResponseSchema<T>
->;
+export type PaginationResponse<T extends z.ZodType> = z.infer<typeof PaginationResponseSchema<T>>;
 
 export type ResponsesType<T extends z.ZodType> = z.infer<ReturnType<typeof ResponsesSchema<T>>>;
 
 export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
 
 export type MessageResponse = z.infer<typeof ResponseWithMessageSchema>;
-
 
 // ─────────────────────────────────────────────
 // PAGINATION UTILITIES

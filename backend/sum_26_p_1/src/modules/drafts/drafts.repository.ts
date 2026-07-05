@@ -1,11 +1,11 @@
 import { drafts } from '@database/drizzle/schema';
 import { type DatabaseContext, InjectDB } from '@database/providers/database.provider';
 import { Injectable } from '@nestjs/common';
-import { eq, and } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 @Injectable()
 export class DraftsRepository {
-  constructor(@InjectDB() private readonly db: DatabaseContext) { }
+  constructor(@InjectDB() private readonly db: DatabaseContext) {}
   async createDraft(data: Omit<typeof drafts.$inferInsert, 'id' | 'createdAt' | 'updatedAt'>) {
     const result = await this.db.insert(drafts).values(data).returning();
 

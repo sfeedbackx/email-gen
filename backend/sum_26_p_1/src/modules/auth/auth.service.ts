@@ -1,15 +1,15 @@
 import { takeUniqueOrThrow } from '@database/drizzle/helper';
 import { Permission } from '@modules/permissions/dto/permission.dto';
+import { Role } from '@modules/roles/dto/role.dto';
 import { RolesService } from '@modules/roles/roles.service';
 import { UserWithPermissions } from '@modules/users/dto/users.dto';
-import * as bcrypt from 'bcrypt';
 import { UserRepository } from '@modules/users/repository/users.repository';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
 import { AuthResponse } from './dto/auth.dto';
 import { JwtPayload } from './dto/tokens.dto';
 import { RefreshProvider } from './providers/refresh/refresh.service';
-import { Role } from '@modules/roles/dto/role.dto';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +18,7 @@ export class AuthService {
     private refreshTokenProvider: RefreshProvider,
     private rolesService: RolesService,
     private userRepository: UserRepository,
-  ) { }
+  ) {}
 
   async validateUser(email: string, password: string): Promise<UserWithPermissions | null> {
     const user = await this.userRepository.findByEmail(email).then((value) => value[0]);
@@ -203,7 +203,7 @@ export class AuthService {
       // Revoke the token
       await this.refreshTokenProvider.revokeRefreshToken(tokenDoc.id);
     } catch (error) {
-      console.error(error);
+      // Silently ignore — token already expired or invalid
     }
   }
 
