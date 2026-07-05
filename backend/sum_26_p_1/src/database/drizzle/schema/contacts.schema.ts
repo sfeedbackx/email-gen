@@ -1,7 +1,7 @@
 import { relations } from 'drizzle-orm';
 import * as t from 'drizzle-orm/pg-core';
-import { languageEnum } from './enums.schema';
 import { documents } from './documents.schema';
+import { languageEnum } from './enums.schema';
 import { threads } from './threads.schema';
 import { users } from './users.schema';
 

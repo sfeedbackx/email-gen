@@ -1,9 +1,9 @@
-import { Global, Logger, Module,  OnApplicationShutdown } from "@nestjs/common";
-import { AppConfigModule } from "src/config/config.module";
-import { ConnectionProvider, injectConnectionToken } from "./providers/connection.provider";
-import { DatabaseProvider } from "./providers/database.provider";
-import { ModuleRef } from "@nestjs/core";
-import { Pool } from "pg";
+import { Global, Logger, Module, OnApplicationShutdown } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
+import { Pool } from 'pg';
+import { AppConfigModule } from 'src/config/config.module';
+import { ConnectionProvider, injectConnectionToken } from './providers/connection.provider';
+import { DatabaseProvider } from './providers/database.provider';
 
 @Global()
 @Module({
@@ -11,8 +11,7 @@ import { Pool } from "pg";
   providers: [ConnectionProvider, DatabaseProvider],
   exports: [ConnectionProvider, DatabaseProvider],
 })
-export class DatabaseModule implements OnApplicationShutdown { 
-
+export class DatabaseModule implements OnApplicationShutdown {
   private readonly logger = new Logger(DatabaseModule.name);
 
   constructor(private readonly moduleRef: ModuleRef) {}

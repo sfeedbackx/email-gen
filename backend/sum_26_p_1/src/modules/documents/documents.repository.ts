@@ -1,14 +1,13 @@
 import { documents } from '@database/drizzle/schema';
 import { type DatabaseContext, InjectDB } from '@database/providers/database.provider';
 import { Injectable } from '@nestjs/common';
-import { eq, and } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 @Injectable()
 export class DocumentsRepository {
-  constructor(@InjectDB() private readonly db: DatabaseContext) { }
+  constructor(@InjectDB() private readonly db: DatabaseContext) {}
   async createDocument(data: Omit<typeof documents.$inferInsert, 'id' | 'createdAt'>) {
     return this.db.insert(documents).values(data).returning();
-
   }
 
   async findAllByContactId(contactId: number) {
@@ -21,7 +20,6 @@ export class DocumentsRepository {
       .from(documents)
       .where(and(eq(documents.id, id), eq(documents.contactId, contactId)))
       .limit(1);
-
   }
 
   async updateDocument(
@@ -34,7 +32,6 @@ export class DocumentsRepository {
       .set(data)
       .where(and(eq(documents.id, id), eq(documents.contactId, contactId)))
       .returning();
-
   }
 
   async deleteDocument(id: number, contactId: number) {

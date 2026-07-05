@@ -5,7 +5,6 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { Profile, Strategy, VerifyFunction, VerifyFunctionWithRequest } from 'passport-facebook';
 
-import { log } from 'node:console';
 import { z } from 'zod';
 
 @Injectable()

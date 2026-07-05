@@ -1,12 +1,12 @@
 import { rolePermissions, roles, userRoles } from '@database/drizzle/schema/users.schema';
 import { type DatabaseContext, InjectDB } from '@database/providers/database.provider';
+import { UserType } from '@modules/users/dto/users.enums';
 import { Injectable } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
-import { UserType } from '@modules/users/dto/users.enums';
 
 @Injectable()
 export class RolesRepository {
-  constructor(@InjectDB() private readonly db: DatabaseContext) { }
+  constructor(@InjectDB() private readonly db: DatabaseContext) {}
 
   async findRoleById(id: number) {
     return await this.db.select().from(roles).where(eq(roles.id, id));

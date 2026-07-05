@@ -1,14 +1,14 @@
 import {
   ArgumentsHost,
-  Catch,
-  ExceptionFilter,
   BadRequestException,
+  Catch,
   ConflictException,
+  ExceptionFilter,
+  ForbiddenException,
   HttpException,
   HttpStatus,
-  ForbiddenException,
-  NotFoundException,
   Logger,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
@@ -72,7 +72,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
       message = this.resolveHttpExceptionMessage(exception);
 
       const errorResponse = exception.getResponse();
-      if (typeof errorResponse === 'object' && errorResponse !== null && 'errors' in errorResponse) {
+      if (
+        typeof errorResponse === 'object' &&
+        errorResponse !== null &&
+        'errors' in errorResponse
+      ) {
         errors = errorResponse.errors;
       }
 

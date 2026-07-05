@@ -22,24 +22,11 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@modules/*": [
-        "src/modules/*"
-      ],
-      "@common/*": [
-        "src/common/*"
-      ],
-      "@config/*": [
-        "src/config/*"
-      ],
-      "@database/*": [
-        "src/database/*"
-      ],
-      "@infrastructure/*": [
-        "src/infrastructure/*"
-      ],
-      "@localization/*": [
-        "src/localization/*"
-      ]
+      "@modules/*": ["src/modules/*"],
+      "@common/*": ["src/common/*"],
+      "@config/*": ["src/config/*"],
+      "@database/*": ["src/database/*"],
+      "@infrastructure/*": ["src/infrastructure/*"]
     }
   }
 }

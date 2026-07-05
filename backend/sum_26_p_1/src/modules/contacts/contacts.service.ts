@@ -1,3 +1,4 @@
+import { takeUniqueOrThrow } from '@database/drizzle/helper';
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { ContactsRepository } from './contacts.repository';
 import {
@@ -6,11 +7,10 @@ import {
   CreateContactType,
   UpdateContactType,
 } from './dto/contacts.dto';
-import { takeUniqueOrThrow } from '@database/drizzle/helper';
 
 @Injectable()
 export class ContactsService {
-  constructor(private readonly contactRepository: ContactsRepository) { }
+  constructor(private readonly contactRepository: ContactsRepository) {}
 
   async createContact(userId: string, data: CreateContactType): Promise<ContactResponseType> {
     const contact = await this.contactRepository

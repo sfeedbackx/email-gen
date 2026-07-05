@@ -23,7 +23,7 @@ export const CreateContactSchema = z.object({
   context: ContextSchema.optional(),
   language: LanguageSchema,
 });
-export class CreateContactDto extends createZodDto(CreateContactSchema) { }
+export class CreateContactDto extends createZodDto(CreateContactSchema) {}
 export type CreateContactType = z.infer<typeof CreateContactSchema>;
 
 export const UpdateContactSchema = z
@@ -36,13 +36,13 @@ export const UpdateContactSchema = z
   .refine((data) => Object.values(data).some((v) => v !== undefined), {
     message: 'At least one field must be provided',
   });
-export class UpdateContactDto extends createZodDto(UpdateContactSchema) { }
+export class UpdateContactDto extends createZodDto(UpdateContactSchema) {}
 export type UpdateContactType = z.infer<typeof UpdateContactSchema>;
 
 export const ContactParamSchema = z.object({
   id: IdIntSchema,
 });
-export class ContactParamDto extends createZodDto(ContactParamSchema) { }
+export class ContactParamDto extends createZodDto(ContactParamSchema) {}
 export type ContactParamType = z.infer<typeof ContactParamSchema>;
 
 // ─────────────────────────────────────────────
@@ -59,7 +59,7 @@ export const ContactResponseSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
 });
-export class ContactResponseDto extends createZodDto(ContactResponseSchema) { }
+export class ContactResponseDto extends createZodDto(ContactResponseSchema) {}
 export type ContactResponseType = z.infer<typeof ContactResponseSchema>;
 
 export const ContactWithDetailsResponseSchema = ContactResponseSchema.extend({
@@ -80,7 +80,7 @@ export const ContactWithDetailsResponseSchema = ContactResponseSchema.extend({
     }),
   ),
 });
-export class ContactWithDetailsResponseDto extends createZodDto(ContactWithDetailsResponseSchema) { }
+export class ContactWithDetailsResponseDto extends createZodDto(ContactWithDetailsResponseSchema) {}
 export type ContactWithDetailsResponseType = z.infer<typeof ContactWithDetailsResponseSchema>;
 
 // ─────────────────────────────────────────────
@@ -88,11 +88,11 @@ export type ContactWithDetailsResponseType = z.infer<typeof ContactWithDetailsRe
 // ─────────────────────────────────────────────
 
 export const ContactListResponseSchema = StandardResponseSchema(ContactResponseSchema);
-export class ContactListResponseDto extends createZodDto(ContactListResponseSchema) { }
+export class ContactListResponseDto extends createZodDto(ContactListResponseSchema) {}
 export type ContactListResponseType = z.infer<typeof ContactListResponseSchema>;
 
 export const ContactSingleResponseSchema = StandardResponseSchema(ContactResponseSchema);
-export class ContactSingleResponseDto extends createZodDto(ContactSingleResponseSchema) { }
+export class ContactSingleResponseDto extends createZodDto(ContactSingleResponseSchema) {}
 export type ContactSingleResponseType = z.infer<typeof ContactSingleResponseSchema>;
 
 export const ContactWithDetailsResponseWrapperSchema = StandardResponseSchema(
@@ -100,7 +100,7 @@ export const ContactWithDetailsResponseWrapperSchema = StandardResponseSchema(
 );
 export class ContactWithDetailsResponseWrapperDto extends createZodDto(
   ContactWithDetailsResponseWrapperSchema,
-) { }
+) {}
 export type ContactWithDetailsResponseWrapperType = z.infer<
   typeof ContactWithDetailsResponseWrapperSchema
 >;

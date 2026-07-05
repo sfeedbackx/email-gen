@@ -1,11 +1,11 @@
 import { threads } from '@database/drizzle/schema';
 import { type DatabaseContext, InjectDB } from '@database/providers/database.provider';
 import { Injectable } from '@nestjs/common';
-import { eq, and } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 @Injectable()
 export class ThreadsRepository {
-  constructor(@InjectDB() private readonly db: DatabaseContext) { }
+  constructor(@InjectDB() private readonly db: DatabaseContext) {}
   async createThread(data: Omit<typeof threads.$inferInsert, 'id' | 'createdAt' | 'updatedAt'>) {
     return this.db.insert(threads).values(data).returning();
   }
@@ -47,6 +47,9 @@ export class ThreadsRepository {
   }
 
   async deleteThread(id: number, contactId: number) {
-    return this.db.delete(threads).where(and(eq(threads.id, id), eq(threads.contactId, contactId))).returning();
+    return this.db
+      .delete(threads)
+      .where(and(eq(threads.id, id), eq(threads.contactId, contactId)))
+      .returning();
   }
 }

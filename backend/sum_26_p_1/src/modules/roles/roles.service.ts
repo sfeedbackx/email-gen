@@ -1,16 +1,16 @@
+import { takeUniqueOrThrow } from '@database/drizzle/helper';
+import { Permission } from '@modules/permissions/dto/permission.dto';
 import { PermissionRepository } from '@modules/permissions/repository/permission.repository';
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Role } from './dto/role.dto';
 import { RolesRepository } from './repository/roles.repository';
-import { Permission } from '@modules/permissions/dto/permission.dto';
-import { takeUniqueOrThrow } from '@database/drizzle/helper';
 
 @Injectable()
 export class RolesService {
   constructor(
     private readonly rolesRepository: RolesRepository,
     private readonly permissionRepository: PermissionRepository,
-  ) { }
+  ) {}
 
   async getPermissionsForRole(roleId: number): Promise<Permission[]> {
     return this.permissionRepository.getPermissionsForRole(roleId);

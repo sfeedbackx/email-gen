@@ -1,9 +1,9 @@
+import { takeUniqueOrThrow } from '@database/drizzle/helper';
 import { ContactsRepository } from '@modules/contacts/contacts.repository';
 import { ThreadsRepository } from '@modules/threads/threads.repository';
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { MessagesRepository } from './messages.repository';
 import { CreateMessageType, MessageResponseType } from './dto/messages.dto';
-import { takeUniqueOrThrow } from '@database/drizzle/helper';
+import { MessagesRepository } from './messages.repository';
 
 @Injectable()
 export class MessagesService {
@@ -11,7 +11,7 @@ export class MessagesService {
     private readonly messageRepository: MessagesRepository,
     private readonly threadRepository: ThreadsRepository,
     private readonly contactRepository: ContactsRepository,
-  ) { }
+  ) {}
 
   async createMessage(
     userId: string,
@@ -57,7 +57,7 @@ export class MessagesService {
     contactId: number,
     threadId: number,
     messageId: number,
-  ): Promise<void> {
+  ): Promise<MessageResponseType> {
     await Promise.all([
       this.contactRepository
         .findById(contactId, userId)
@@ -71,11 +71,10 @@ export class MessagesService {
       .findById(messageId, threadId)
       .then((value) => takeUniqueOrThrow(value, new NotFoundException('Message not found')));
 
-    this.messageRepository
+    return this.messageRepository
       .deleteMessage(message.id, threadId)
       .then((value) =>
         takeUniqueOrThrow(value, new InternalServerErrorException('Message not deleted')),
       );
-    return;
   }
 }

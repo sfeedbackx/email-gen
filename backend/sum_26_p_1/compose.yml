@@ -1,4 +1,5 @@
 services:
+
   postgres:
     image: postgres:18-alpine
     container_name: emailgen-postgres
@@ -42,12 +43,10 @@ services:
         condition: service_healthy
     env_file:
       - ./.env
-    command: sh -c "npm run db:generate; npm run db:migrate"
     volumes:
       - ./src/database/drizzle:/app/src/database/drizzle
-    restart: "no" # Don't restart if migration fails
+    restart: "no"
 
-  # To run the API in a container
   api:
     build:
       context: .
@@ -58,19 +57,49 @@ services:
     environment:
       - NODE_ENV=development
     env_file:
-      - ./.env.development
       - ./.env
-    volumes:
-      - ./locales:/app/locales
     depends_on:
       postgres:
         condition: service_healthy
       # redis:
       #   condition: service_healthy
-      migrate:
-        condition: service_completed_successfully
+      ollama:
+        condition: service_started
     restart: unless-stopped
+
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+    container_name: emailgen-frontend
+    ports:
+      - "80:80"
+    env_file:
+      - ../../frontend/.env
+    #depends_on:
+    #  api:
+    #    condition: service_healthy
+    restart: unless-stopped
+
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities:
+                - gpu
+    volumes:
+        - ollama:/root/.ollama
+    ports:
+        - 11434:11434
+    container_name: ollama
+    image: ollama/ollama
 
 volumes:
   postgres_data:
   # redis_data:
+  ollama:
+      external: true
+      name: ollama

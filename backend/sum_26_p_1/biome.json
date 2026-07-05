@@ -1,16 +1,13 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.0/schema.json",
   "files": {
-    "include": ["src/**/*", "test/**/*", "specs/**/*"],
-    "ignore": ["node_modules", "dist"]
+    "includes": ["**", "**/!node_modules/**", "**/!dist/**"]
   },
-  "organizeImports": {
-    "enabled": true
-  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "suspicious": {
         "noExplicitAny": "error"
       },
@@ -24,14 +21,14 @@
         "noForEach": "off"
       }
     },
-    "ignore": ["node_modules", "dist"]
+    "includes": ["**", "!**/node_modules", "!**/dist"]
   },
   "formatter": {
     "enabled": true,
     "indentWidth": 2,
     "indentStyle": "space",
     "lineWidth": 100,
-    "ignore": ["node_modules", "dist"]
+    "includes": ["**", "!**/node_modules", "!**/dist"]
   },
   "javascript": {
     "formatter": {

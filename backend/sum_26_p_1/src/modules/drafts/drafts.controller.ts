@@ -1,3 +1,5 @@
+import { MessageSingleResponseDto } from '@modules/messages/dto/messages.dto';
+import { UserWithPermissions } from '@modules/users/dto/users.dto';
 import {
   Body,
   Controller,
@@ -13,22 +15,21 @@ import {
 import { ZodSerializerDto } from 'nestjs-zod';
 import { DraftsService } from './drafts.service';
 import {
+  DraftListResponseDto,
+  DraftParamDto,
+  DraftSingleResponseDto,
+  DraftThreatDto,
   GenerateDraftDto,
   UpdateDraftDto,
-  DraftParamDto,
-  DraftListResponseDto,
-  DraftSingleResponseDto,
 } from './dto/drafts.dto';
-import { MessageSingleResponseDto } from '@modules/messages/dto/messages.dto';
-import { UserWithPermissions } from '@modules/users/dto/users.dto';
 
 @Controller('contacts/:contactId/threads/:threadId/drafts')
 export class DraftsController {
-  constructor(private readonly draftsService: DraftsService) { }
+  constructor(private readonly draftsService: DraftsService) {}
 
   @Get()
   @ZodSerializerDto(DraftListResponseDto)
-  async getDrafts(@Req() req: { user: UserWithPermissions }, @Param() param: DraftParamDto) {
+  async getDrafts(@Req() req: { user: UserWithPermissions }, @Param() param: DraftThreatDto) {
     const data = await this.draftsService.getDrafts(req.user.id, param.contactId, param.threadId);
     return { data, statusCode: HttpStatus.OK };
   }
@@ -38,7 +39,7 @@ export class DraftsController {
   @ZodSerializerDto(DraftSingleResponseDto)
   async generateDraft(
     @Req() req: { user: UserWithPermissions },
-    @Param() param: DraftParamDto,
+    @Param() param: DraftThreatDto,
     @Body() body: GenerateDraftDto,
   ) {
     const data = await this.draftsService.generateDraft(

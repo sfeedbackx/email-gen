@@ -1,6 +1,6 @@
+import { DatabaseModule } from '@database/database.module';
 import { Module } from '@nestjs/common';
 import { PermissionRepository } from './repository/permission.repository';
-import { DatabaseModule } from '@database/database.module';
 
 @Module({
   imports: [DatabaseModule],

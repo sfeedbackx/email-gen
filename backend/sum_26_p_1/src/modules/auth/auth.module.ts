@@ -1,4 +1,5 @@
 import { AppConfigModule } from '@config/config.module';
+import { AppConfigService } from '@config/config.service';
 import { DatabaseModule } from '@database/database.module';
 import { RolesModule } from '@modules/roles/roles.module';
 import { UsersModule } from '@modules/users/users.module';
@@ -9,7 +10,6 @@ import { AuthService } from './auth.service';
 import { RefreshProvider } from './providers/refresh/refresh.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
-import { AppConfigService } from '@config/config.service';
 
 @Module({
   imports: [
@@ -31,4 +31,4 @@ import { AppConfigService } from '@config/config.service';
   providers: [AuthService, RefreshProvider, JwtStrategy, LocalStrategy],
   controllers: [AuthController],
 })
-export class AuthModule { }
+export class AuthModule {}

@@ -1,7 +1,7 @@
 import { EmailSchema, NullableString, OptionalString, UUIDSchema } from '@common/validation';
+import { RoleSchema } from '@modules/roles/dto/role.dto';
 import { z } from 'zod/v4';
 import { AuthProviderSchema, UserAttributesSchema, UserTypeSchema } from './users.enums';
-import { RoleSchema } from '@modules/roles/dto/role.dto';
 
 export const UserSchema = z.object({
   id: UUIDSchema,
