@@ -53,6 +53,6 @@ export class AppConfigService {
   }
 
   get ollamaModel(): string {
-    return this.configService.get<string>('OLLAMA_MODEL') ?? 'mistral';
+    return this.configService.get<string>('OLLAMA_MODEL') ?? 'qwen2.5';
   }
 }

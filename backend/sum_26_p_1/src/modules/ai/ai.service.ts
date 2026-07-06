@@ -27,7 +27,7 @@ export class AiService {
           { role: 'system', content: systemMsg },
           { role: 'user', content: userMsg },
         ],
-        options: { temperature: 0.7 },
+        options: { temperature: 0.3 },
       });
 
       return response.message.content;
@@ -48,7 +48,7 @@ export class AiService {
           { role: 'system', content: systemMsg },
           { role: 'user', content: userMsg },
         ],
-        options: { temperature: 0.7 },
+        options: { temperature: 0.3 },
       });
 
       return response.message.content;
@@ -72,27 +72,31 @@ export class AiService {
   // ─────────────────────────────────────────────
 
   private buildSystemPrompt(data: GenerateEmailType): string {
+    const userFullName =
+      [data.user.firstName, data.user.lastName].filter(Boolean).join(' ') || 'Me';
     const langInstruction =
       data.contact.language === 'fr'
         ? 'You must write the email in French.'
         : 'You must write the email in English.';
 
-    return `You are an expert email writing assistant. You write emails FROM the user TO a contact. The "Conversation so far" shows past messages — "Me (you)" is what the user wrote, and "[Contact Name]" is what the contact sent. You must write the next email in the user's voice, as a response to the contact. ${langInstruction}
+    return `You are an expert email writing assistant for ${userFullName}. You write emails FROM ${userFullName} TO a contact. The "Conversation so far" shows past messages — "${userFullName}" is what the user wrote, and "[Contact Name]" is what the contact sent. You must write the next email in ${userFullName}'s voice, as a response to the contact. ${langInstruction}
 
 Rules:
-- Write only the email body — no subject line, no signature block, no explanation.
+- Write only the email body — no subject line, no explanation.
+- Sign the email with "${userFullName}" at the end. Never use "[Your Name]" or any placeholder.
+- Keep it short. If the conversation already has messages, write a brief reply — just acknowledge the contact's latest point and state what ${userFullName} will do. Do not thank them for their email, do not re-state the situation, do not repeat deadlines or details from earlier messages.
+- If this is the first message (no history), write a complete email addressing the contact's context and the user's instruction.
 - Match the tone to the contact relationship (formal if context suggests formality, friendly if appropriate).
-- Address the contact's message content directly — respond to their points, questions, or requests.
 - Never include meta-commentary or write from the contact's perspective.
 - Output plain text only — no markdown formatting.`.trim();
   }
 
   private buildUserPrompt(data: GenerateEmailType): string {
-    const { contact, thread, messages, prompt, documents } = data;
+    const { user, contact, thread, messages, prompt, documents } = data;
 
-    const contextBlock = contact.context
-      ? `Style guidance: ${contact.context}`
-      : '';
+    const userFullName = [user.firstName, user.lastName].filter(Boolean).join(' ') || 'Me';
+
+    const contextBlock = contact.context ? `Style guidance: ${contact.context}` : '';
 
     const docsBlock =
       documents && documents.length > 0
@@ -101,13 +105,16 @@ Rules:
 
     const historyBlock =
       messages.length > 0
-        ? `Conversation so far (most recent last):\n${messages.map((m) => {
-            const sender = m.role === 'ME' ? 'Me (you)' : contact.name;
-            return `${sender}: ${m.content}`;
-          }).join('\n\n')}`
+        ? `Conversation so far (most recent last):\n${messages
+            .map((m) => {
+              const sender = m.role === 'ME' ? userFullName : contact.name;
+              return `${sender}: ${m.content}`;
+            })
+            .join('\n\n')}`
         : 'No previous messages in this thread.';
 
     return [
+      `From: ${userFullName}`,
       `Write to: ${contact.name}${contact.email ? ` <${contact.email}>` : ''}`,
       `Subject: ${thread.subject}`,
       contextBlock,
@@ -115,11 +122,13 @@ Rules:
       historyBlock,
       '',
       `My instruction: ${prompt}`,
-    ].filter(Boolean).join('\n');
+    ]
+      .filter(Boolean)
+      .join('\n');
   }
 
   private buildRefineSystemPrompt(): string {
-    return 'You are an expert email writing assistant. Revise the draft below according to the user\'s instruction. Output only the revised email body — no explanations, no subject line, no markdown.';
+    return "You are an expert email writing assistant. Revise the draft below according to the user's instruction. Output only the revised email body — no explanations, no subject line, no markdown.";
   }
 
   private buildRefineUserPrompt(data: RefineEmailType): string {

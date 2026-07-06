@@ -26,7 +26,9 @@ export const DraftSection = (props: {
   return (
     <div className="h-full overflow-hidden">
       <div className="h-full p-6 flex flex-col gap-3 overflow-y-auto">
-        {!threadId && <p className="text-gray-400 text-sm">Select a thread to view drafts</p>}
+        {!threadId && !(props.isGenerating || props.selectedDraft) && (
+          <p className="text-gray-400 text-sm">Select a thread to view drafts</p>
+        )}
         {props.isGenerating || props.selectedDraft ? (
           <MailBox
             message={props.selectedDraft?.content ?? ''}
@@ -47,6 +49,8 @@ export const DraftSection = (props: {
           <Text c="red" size="sm">
             {getErrorMessage(draftsError, 'Failed to load drafts')}
           </Text>
+        ) : draftsFetched.length === 0 ? (
+          <p className="text-gray-400 text-sm">There are no drafts</p>
         ) : (
           draftsFetched.map((draft, i) => (
             <DraftsBanner

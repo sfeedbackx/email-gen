@@ -175,7 +175,6 @@ export const MessagingSection = (props: {
         <Textarea
           autosize
           minRows={1}
-          maxRows={3}
           placeholder={
             inputError ||
             (contactMode ? 'Paste or type the contact reply...' : 'Describe the email you want...')

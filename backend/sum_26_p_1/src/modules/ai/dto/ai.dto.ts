@@ -8,6 +8,10 @@ import { z } from 'zod';
 // ─────────────────────────────────────────────
 
 export const GenerateEmailSchema = z.object({
+  user: z.object({
+    firstName: z.string().nullable(),
+    lastName: z.string().nullable(),
+  }),
   contact: z.object({
     name: z.string(),
     email: z.string().nullable(),

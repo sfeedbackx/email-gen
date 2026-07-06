@@ -20,6 +20,8 @@ export class DraftsService {
 
   async generateDraft(
     userId: string,
+    userFirstName: string | null,
+    userLastName: string | null,
     contactId: number,
     threadId: number,
     data: GenerateDraftType,
@@ -36,6 +38,7 @@ export class DraftsService {
     const threadMessages = await this.messageRepository.findAllByThreadId(threadId);
 
     const generatedContent = await this.aiService.generateEmail({
+      user: { firstName: userFirstName, lastName: userLastName },
       contact,
       thread,
       messages: threadMessages,

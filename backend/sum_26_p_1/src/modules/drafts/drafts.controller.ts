@@ -44,6 +44,8 @@ export class DraftsController {
   ) {
     const data = await this.draftsService.generateDraft(
       req.user.id,
+      req.user.firstName,
+      req.user.lastName,
       param.contactId,
       param.threadId,
       body,
