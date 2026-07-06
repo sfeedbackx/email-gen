@@ -17,12 +17,17 @@ export class AiService {
   }
 
   async generateEmail(data: GenerateEmailType): Promise<string> {
-    const prompt = this.buildGeneratePrompt(data);
+    const systemMsg = this.buildSystemPrompt(data);
+    const userMsg = this.buildUserPrompt(data);
 
     try {
       const response = await this.ollama.chat({
         model: this.model,
-        messages: [{ role: 'user', content: prompt }],
+        messages: [
+          { role: 'system', content: systemMsg },
+          { role: 'user', content: userMsg },
+        ],
+        options: { temperature: 0.7 },
       });
 
       return response.message.content;
@@ -33,12 +38,17 @@ export class AiService {
   }
 
   async refineEmail(data: RefineEmailType): Promise<string> {
-    const prompt = this.buildRefinePrompt(data);
+    const systemMsg = this.buildRefineSystemPrompt();
+    const userMsg = this.buildRefineUserPrompt(data);
 
     try {
       const response = await this.ollama.chat({
         model: this.model,
-        messages: [{ role: 'user', content: prompt }],
+        messages: [
+          { role: 'system', content: systemMsg },
+          { role: 'user', content: userMsg },
+        ],
+        options: { temperature: 0.7 },
       });
 
       return response.message.content;
@@ -61,13 +71,28 @@ export class AiService {
   // PROMPT BUILDERS
   // ─────────────────────────────────────────────
 
-  private buildGeneratePrompt(data: GenerateEmailType): string {
+  private buildSystemPrompt(data: GenerateEmailType): string {
+    const langInstruction =
+      data.contact.language === 'fr'
+        ? 'You must write the email in French.'
+        : 'You must write the email in English.';
+
+    return `You are an expert email writing assistant. You write emails FROM the user TO a contact. The "Conversation so far" shows past messages — "Me (you)" is what the user wrote, and "[Contact Name]" is what the contact sent. You must write the next email in the user's voice, as a response to the contact. ${langInstruction}
+
+Rules:
+- Write only the email body — no subject line, no signature block, no explanation.
+- Match the tone to the contact relationship (formal if context suggests formality, friendly if appropriate).
+- Address the contact's message content directly — respond to their points, questions, or requests.
+- Never include meta-commentary or write from the contact's perspective.
+- Output plain text only — no markdown formatting.`.trim();
+  }
+
+  private buildUserPrompt(data: GenerateEmailType): string {
     const { contact, thread, messages, prompt, documents } = data;
 
-    const langInstruction =
-      contact.language === 'fr' ? 'Write the email in French.' : 'Write the email in English.';
-
-    const contextBlock = contact.context ? `Contact context: ${contact.context}` : '';
+    const contextBlock = contact.context
+      ? `Style guidance: ${contact.context}`
+      : '';
 
     const docsBlock =
       documents && documents.length > 0
@@ -76,39 +101,28 @@ export class AiService {
 
     const historyBlock =
       messages.length > 0
-        ? `Previous conversation:\n${messages.map((m) => `[${m.role === 'ME' ? 'Me' : contact.name}]: ${m.content}`).join('\n\n')}`
-        : 'No previous messages.';
+        ? `Conversation so far (most recent last):\n${messages.map((m) => {
+            const sender = m.role === 'ME' ? 'Me (you)' : contact.name;
+            return `${sender}: ${m.content}`;
+          }).join('\n\n')}`
+        : 'No previous messages in this thread.';
 
-    return `
-You are an email writing assistant.
-
-${langInstruction}
-
-Contact: ${contact.name}${contact.email ? ` <${contact.email}>` : ''}
-${contextBlock}
-
-Subject: ${thread.subject}
-
-${docsBlock}
-
-${historyBlock}
-
-User instruction: ${prompt}
-
-Write only the email body. No subject line. No explanation. Just the email.
-    `.trim();
+    return [
+      `Write to: ${contact.name}${contact.email ? ` <${contact.email}>` : ''}`,
+      `Subject: ${thread.subject}`,
+      contextBlock,
+      docsBlock,
+      historyBlock,
+      '',
+      `My instruction: ${prompt}`,
+    ].filter(Boolean).join('\n');
   }
 
-  private buildRefinePrompt(data: RefineEmailType): string {
-    return `
-You are an email writing assistant.
+  private buildRefineSystemPrompt(): string {
+    return 'You are an expert email writing assistant. Revise the draft below according to the user\'s instruction. Output only the revised email body — no explanations, no subject line, no markdown.';
+  }
 
-Here is an existing email draft:
-${data.content}
-
-User instruction: ${data.prompt}
-
-Rewrite the email based on the instruction. Write only the email body. No explanation.
-    `.trim();
+  private buildRefineUserPrompt(data: RefineEmailType): string {
+    return `Current draft:\n${data.content}\n\nRevision instruction: ${data.prompt}`;
   }
 }

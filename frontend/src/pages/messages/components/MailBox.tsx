@@ -97,7 +97,7 @@ export default function MailBox(props: {
     <>
       <div className="flex flex-col overflow-hidden w-full h-full">
         {props.isLoading ? (
-          <div className="flex flex-col gap-3 animate-pulse bg-gray-100 rounded-lg border p-4 w-full">
+          <div className="flex flex-col gap-3 animate-pulse h-full bg-gray-100 rounded-lg border p-4 w-full">
             <div className="h-3 bg-gray-300 rounded w-1/4" />
             <div className="h-3 bg-gray-300 rounded w-full" />
             <div className="h-3 bg-gray-300 rounded w-3/4" />

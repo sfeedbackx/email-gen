@@ -87,9 +87,11 @@ export const MessagingSection = (props: {
     }
 
     genDraft(result.data, {
-      onSuccess: () => {
+      onSuccess: (data) => {
         setInput('');
         setInputError(undefined);
+        props.setSelectedDraft(data);
+        props.setDraft(true);
       },
     });
   };
