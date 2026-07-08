@@ -95,20 +95,22 @@
     "typescript": "^5.9.3"
   },
   "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
-  }
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": "src",
+  "testRegex": ".*\\.spec\\.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "collectCoverageFrom": ["**/*.(t|j)s"],
+  "coverageDirectory": "../coverage",
+  "testEnvironment": "node",
+  "moduleNameMapper": {
+    "^@database/(.*)$": "<rootDir>/database/$1",
+    "^@modules/(.*)$": "<rootDir>/modules/$1",
+    "^@config/(.*)$": "<rootDir>/config/$1",
+    "^@common/(.*)$": "<rootDir>/common/$1"
+  },
+  "verbose": true,
+  "testTimeout": 60000
+}
 }

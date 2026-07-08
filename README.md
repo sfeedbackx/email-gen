@@ -51,6 +51,9 @@ cd frontend
 npm install
 npm run dev
 ```
+## Benchmarks 
+
+We did a comparison between different local models: [qwen2.5, llama3.1, mistral]. Check them here: [Benchmark](./benchmark.md)
 
 ## Environment
 
